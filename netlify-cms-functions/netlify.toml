@@ -7,3 +7,5 @@
   YARN_FLAGS = "--no-ignore-optional"
 
 
+[functions]
+  directory = "netlify/functions/"
