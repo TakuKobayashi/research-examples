@@ -52,3 +52,13 @@ Flaskのインストール
 ```
 pipenv install flask
 ```
+
+### 各種serverless pluginのインストール
+
+[package.json](./package.json) を作ってPluginのインストールなどはNPM経由で管理していく方がやりやすそう
+その中で特に
+
+* [serverless-python-requirements](https://www.serverless.com/plugins/serverless-python-requirements)
+* [serverless-wsgi](https://www.serverless.com/plugins/serverless-wsgi)
+
+は最低限インストールして使用する
