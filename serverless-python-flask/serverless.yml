@@ -33,7 +33,7 @@ plugins:
 
 custom:
   wsgi:
-    app: app.app
+    app: api.app
     packRequirements: false
   pythonRequirements:
     dockerizePip: false  # docker使うならtrue / 使うライブラリにネイティブビルドがないので docker を利用したビルドを実施しない
@@ -62,7 +62,7 @@ custom:
 
 functions:
   app:
-    handler: wsgi.handler
+    handler: wsgi_handler.handler
     events:
       - http: ANY /
       - http: 'ANY {proxy+}'
