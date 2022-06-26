@@ -31,9 +31,12 @@ plugins:
   - serverless-dotenv-plugin
   - serverless-wsgi
 
-# you can overwrite defaults here
-#  stage: dev
-#  region: us-east-1
+custom:
+  wsgi:
+    app: app.app
+    packRequirements: false
+  pythonRequirements:
+    dockerizePip: false  # docker使うならtrue / 使うライブラリにネイティブビルドがないので docker を利用したビルドを実施しない
 
 # you can add statements to the Lambda function's IAM Role here
 #  iam:
@@ -57,21 +60,12 @@ plugins:
 #  environment:
 #    variable1: value1
 
-# you can add packaging information here
-#package:
-#  patterns:
-#    - '!exclude-me.py'
-#    - '!exclude-me-dir/**'
-#    - include-me.py
-#    - include-me-dir/**
-
 functions:
-  hello:
-    handler: handler.hello
+  app:
+    handler: wsgi.handler
     events:
-      - http:
-          path: hello
-          method: get
+      - http: ANY /
+      - http: 'ANY {proxy+}'
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
