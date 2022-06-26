@@ -34,7 +34,6 @@ plugins:
 custom:
   wsgi:
     app: api.app
-    packRequirements: false
   pythonRequirements:
     dockerizePip: false  # docker使うならtrue / 使うライブラリにネイティブビルドがないので docker を利用したビルドを実施しない
 
