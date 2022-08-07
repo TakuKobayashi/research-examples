@@ -3,30 +3,29 @@ package net.taptappun.taku.kobayashi.mlkitsample
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.util.Size
-import com.google.android.gms.tasks.Task
 import com.google.mlkit.vision.common.InputImage
 
 abstract class ImageDetector<T> {
     private var markingBitmap: Bitmap? = null
 
     fun release() {
-        if(markingBitmap != null){
+        if (markingBitmap != null) {
             markingBitmap?.recycle()
             markingBitmap = null
         }
     }
 
     fun clear() {
-        if(markingBitmap != null){
+        if (markingBitmap != null) {
             val size = Size(markingBitmap!!.width, markingBitmap!!.height)
             this.release()
             this.initRenderBitmap(size)
         }
     }
 
-    fun initRenderBitmap(size: Size){
-        if(markingBitmap == null || markingBitmap!!.isRecycled){
-            markingBitmap = Bitmap.createBitmap(size.width, size.height, Bitmap.Config.ARGB_8888);
+    fun initRenderBitmap(size: Size) {
+        if (markingBitmap == null || markingBitmap!!.isRecycled) {
+            markingBitmap = Bitmap.createBitmap(size.width, size.height, Bitmap.Config.ARGB_8888)
         }
     }
 
@@ -35,15 +34,15 @@ abstract class ImageDetector<T> {
     }
 
     abstract fun detect(image: InputImage)
-    abstract protected fun renderDetectMarks(detects: MutableList<T>)
+    protected abstract fun renderDetectMarks(detects: MutableList<T>)
 
     protected fun refreshRenderMarkedCanvas(): Canvas {
         clear()
-        val canvas = if(markingBitmap == null) {
+        val canvas = if (markingBitmap == null) {
             Canvas()
-        }else{
-            Canvas(markingBitmap!!);
+        } else {
+            Canvas(markingBitmap!!)
         }
-        return canvas;
+        return canvas
     }
 }

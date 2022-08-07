@@ -7,7 +7,7 @@ import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
 
 class FaceImageDetector : ImageDetector<Face>() {
-    override public fun detect(image: InputImage) {
+    public override fun detect(image: InputImage) {
         // High-accuracy landmark detection and face classification
         /*
         val highAccuracyOpts = FaceDetectorOptions.Builder()

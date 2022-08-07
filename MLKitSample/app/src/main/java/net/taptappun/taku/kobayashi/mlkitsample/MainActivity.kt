@@ -8,24 +8,22 @@ import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.util.SparseIntArray
 import android.view.Surface
 import android.view.SurfaceHolder
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
-import net.taptappun.taku.kobayashi.mlkitsample.databinding.ActivityMainBinding
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import net.taptappun.taku.kobayashi.mlkitsample.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
@@ -35,7 +33,7 @@ class MainActivity : AppCompatActivity() {
     private val surfaceViewExecutor: ExecutorService by lazy {
         Executors.newSingleThreadExecutor()
     }
-    private val detectors = setOf (
+    private val detectors = setOf(
         FaceImageDetector(),
         BarcodeImageDetector(),
     )
@@ -76,7 +74,7 @@ class MainActivity : AppCompatActivity() {
         requestCode: Int,
         permissions: Array<String>,
         grantResults:
-        IntArray
+            IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
@@ -84,9 +82,11 @@ class MainActivity : AppCompatActivity() {
                 // カメラ開始処理
                 startCamera()
             } else {
-                Toast.makeText(this,
+                Toast.makeText(
+                    this,
                     "Permissions not granted by the user.",
-                    Toast.LENGTH_SHORT).show()
+                    Toast.LENGTH_SHORT
+                ).show()
                 finish()
             }
         }
@@ -94,7 +94,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        for(detector in detectors){
+        for (detector in detectors) {
             detector.release()
         }
     }
@@ -117,22 +117,25 @@ class MainActivity : AppCompatActivity() {
 
             val imageAnalysis = ImageAnalysis.Builder()
                 // enable the following line if RGBA output is needed.
-                //.setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
+                // .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
-            imageAnalysis.setAnalyzer(imageAnalysisExecutor, ImageAnalysis.Analyzer { imageProxy ->
-                val mediaImage = imageProxy.image
-                if (mediaImage != null) {
-                    val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
-                    for(detector in detectors){
-                        detector.detect(image)
+            imageAnalysis.setAnalyzer(
+                imageAnalysisExecutor,
+                ImageAnalysis.Analyzer { imageProxy ->
+                    val mediaImage = imageProxy.image
+                    if (mediaImage != null) {
+                        val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
+                        for (detector in detectors) {
+                            detector.detect(image)
+                        }
+                        // Pass image to an ML Kit Vision API
                     }
-                    // Pass image to an ML Kit Vision API
+                    // insert your code here.
+                    // after done, release the ImageProxy object
+                    imageProxy.close()
                 }
-                // insert your code here.
-                // after done, release the ImageProxy object
-                imageProxy.close()
-            })
+            )
 
             // アウトカメラを設定
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
@@ -146,70 +149,75 @@ class MainActivity : AppCompatActivity() {
                 imageAnalysis
             )
         }, ContextCompat.getMainExecutor(this))
-    }
-
-    /**
-     * Get the angle by which an image must be rotated given the device's current
-     * orientation.
-     */
-    @Throws(CameraAccessException::class)
-    private fun getRotationCompensation(cameraId: String, activity: Activity, isFrontFacing: Boolean): Int {
-        val orientations = SparseIntArray()
-        orientations.append(Surface.ROTATION_0, 0)
-        orientations.append(Surface.ROTATION_90, 90)
-        orientations.append(Surface.ROTATION_180, 180)
-        orientations.append(Surface.ROTATION_270, 270)
-        // Get the device's current rotation relative to its "native" orientation.
-        // Then, from the ORIENTATIONS table, look up the angle the image must be
-        // rotated to compensate for the device's rotation.
-        val deviceRotation = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            if (this.display == null){
-                0
-            } else {
-                this.display!!.rotation
-            }
-        } else {
-            this.windowManager.defaultDisplay.rotation
         }
-        var rotationCompensation = orientations.get(deviceRotation)
 
-        // Get the device's sensor orientation.
-        val cameraManager = activity.getSystemService(CAMERA_SERVICE) as CameraManager
-        val sensorOrientation = cameraManager
-            .getCameraCharacteristics(cameraId)
-            .get(CameraCharacteristics.SENSOR_ORIENTATION)!!
-
-        if (isFrontFacing) {
-            rotationCompensation = (sensorOrientation + rotationCompensation) % 360
-        } else { // back-facing
-            rotationCompensation = (sensorOrientation - rotationCompensation + 360) % 360
-        }
-        return rotationCompensation
-    }
-
-    /**
-     * A native method that is implemented by the 'mlkitsample' native library,
-     * which is packaged with this application.
-     */
-    external fun stringFromJNI(): String
-
-    companion object {
-        // Used to load the 'mlkitsample' library on application startup.
-        init {
-            System.loadLibrary("mlkitsample")
-        }
-        public const val TAG = "MLKitSample"
-        private const val REQUEST_CODE_PERMISSIONS = 10
-        // 必要なpermissionのリスト
-        private val REQUIRED_PERMISSIONS =
-            mutableListOf (
-                Manifest.permission.CAMERA,
-                Manifest.permission.RECORD_AUDIO
-            ).apply {
-                // WRITE_EXTERNAL_STORAGEはPie以下で必要
-                if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-                    add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        /**
+         * Get the angle by which an image must be rotated given the device's current
+         * orientation.
+         */
+        @Throws(CameraAccessException::class)
+        private fun getRotationCompensation(
+            cameraId: String,
+            activity: Activity,
+            isFrontFacing: Boolean
+        ): Int {
+            val orientations = SparseIntArray()
+            orientations.append(Surface.ROTATION_0, 0)
+            orientations.append(Surface.ROTATION_90, 90)
+            orientations.append(Surface.ROTATION_180, 180)
+            orientations.append(Surface.ROTATION_270, 270)
+            // Get the device's current rotation relative to its "native" orientation.
+            // Then, from the ORIENTATIONS table, look up the angle the image must be
+            // rotated to compensate for the device's rotation.
+            val deviceRotation = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                if (this.display == null) {
+                    0
+                } else {
+                    this.display!!.rotation
                 }
-            }.toTypedArray()
+            } else {
+                this.windowManager.defaultDisplay.rotation
+            }
+            var rotationCompensation = orientations.get(deviceRotation)
+
+            // Get the device's sensor orientation.
+            val cameraManager = activity.getSystemService(CAMERA_SERVICE) as CameraManager
+            val sensorOrientation = cameraManager
+                .getCameraCharacteristics(cameraId)
+                .get(CameraCharacteristics.SENSOR_ORIENTATION)!!
+
+            if (isFrontFacing) {
+                rotationCompensation = (sensorOrientation + rotationCompensation) % 360
+            } else { // back-facing
+                rotationCompensation = (sensorOrientation - rotationCompensation + 360) % 360
+            }
+            return rotationCompensation
+        }
+
+        /**
+         * A native method that is implemented by the 'mlkitsample' native library,
+         * which is packaged with this application.
+         */
+        external fun stringFromJNI(): String
+
+        companion object {
+            // Used to load the 'mlkitsample' library on application startup.
+            init {
+                System.loadLibrary("mlkitsample")
+            }
+            public const val TAG = "MLKitSample"
+            private const val REQUEST_CODE_PERMISSIONS = 10
+            // 必要なpermissionのリスト
+            private val REQUIRED_PERMISSIONS =
+                mutableListOf(
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.RECORD_AUDIO
+                ).apply {
+                    // WRITE_EXTERNAL_STORAGEはPie以下で必要
+                    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+                        add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    }
+                }.toTypedArray()
+        }
     }
-}
+    

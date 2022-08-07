@@ -1,16 +1,12 @@
 package net.taptappun.taku.kobayashi.mlkitsample
 
 import android.util.Log
-import com.google.android.gms.tasks.Task
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.face.Face
-import com.google.mlkit.vision.face.FaceDetection
-import com.google.mlkit.vision.face.FaceDetectorOptions
 
 class BarcodeImageDetector : ImageDetector<Barcode>() {
-    override public fun detect(image: InputImage) {
+    public override fun detect(image: InputImage) {
         // [START set_detector_options]
         // Format: https://zenn.dev/mochico/articles/0c1f1104852659
         // https://developers.google.com/ml-kit/vision/barcode-scanning/android
@@ -44,7 +40,7 @@ class BarcodeImageDetector : ImageDetector<Barcode>() {
             val corners = barcode.cornerPoints
             val rawValue = barcode.rawValue
             val valueType = barcode.valueType
-            Log.d(MainActivity.TAG, "barCodeBounds:$bounds barCodeRawValue:$rawValue barcodeValueType:$valueType barcodeCornersCount:${corners}")
+            Log.d(MainActivity.TAG, "barCodeBounds:$bounds barCodeRawValue:$rawValue barcodeValueType:$valueType barcodeCornersCount:$corners")
             // See API reference for complete list of supported types
             when (valueType) {
                 Barcode.TYPE_WIFI -> {
