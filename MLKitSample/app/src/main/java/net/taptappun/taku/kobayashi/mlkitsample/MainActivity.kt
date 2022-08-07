@@ -16,6 +16,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
@@ -23,9 +24,14 @@ import androidx.core.content.ContextCompat
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.common.Barcode
 import net.taptappun.taku.kobayashi.mlkitsample.databinding.ActivityMainBinding
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
 
+    private val imageAnalysisExecutor: ExecutorService by lazy {
+        Executors.newSingleThreadExecutor()
+    }
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,22 +94,29 @@ class MainActivity : AppCompatActivity() {
             val preview = Preview.Builder().build()
             preview.setSurfaceProvider(binding.cameraPreview.surfaceProvider)
 
+            val imageAnalysis = ImageAnalysis.Builder()
+                // enable the following line if RGBA output is needed.
+                .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .build()
+            imageAnalysis.setAnalyzer(imageAnalysisExecutor, ImageAnalysis.Analyzer { imageProxy ->
+                val rotationDegrees = imageProxy.imageInfo.rotationDegrees
+                // insert your code here.
+                // after done, release the ImageProxy object
+                imageProxy.close()
+            })
+
             // アウトカメラを設定
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
-            try {
-                // バインドされているカメラを解除
-                cameraProvider.unbindAll()
-                // カメラをライフサイクルにバインド
-                cameraProvider.bindToLifecycle(
-                    this,
-                    cameraSelector,
-                    preview
-                )
-
-            } catch (exc: Exception) {
-                Log.e(TAG, "Use case binding failed", exc)
-            }
+            // バインドされているカメラを解除
+            cameraProvider.unbindAll()
+            // カメラをライフサイクルにバインド
+            cameraProvider.bindToLifecycle(
+                this,
+                cameraSelector,
+                preview,
+                imageAnalysis
+            )
         }, ContextCompat.getMainExecutor(this))
     }
 
