@@ -13,22 +13,16 @@ import android.os.Bundle
 import android.util.Log
 import android.util.SparseIntArray
 import android.view.Surface
-import android.widget.TextView
+import android.view.SurfaceHolder
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.google.mlkit.vision.barcode.BarcodeScannerOptions
-import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.face.FaceDetection
-import com.google.mlkit.vision.face.FaceDetectorOptions
-import com.google.mlkit.vision.face.FaceLandmark
 import net.taptappun.taku.kobayashi.mlkitsample.databinding.ActivityMainBinding
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -38,6 +32,13 @@ class MainActivity : AppCompatActivity() {
     private val imageAnalysisExecutor: ExecutorService by lazy {
         Executors.newSingleThreadExecutor()
     }
+    private val surfaceViewExecutor: ExecutorService by lazy {
+        Executors.newSingleThreadExecutor()
+    }
+    private val detectors = setOf (
+        FaceImageDetector(),
+        BarcodeImageDetector(),
+    )
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,6 +46,18 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val holder = binding.overlaySurfaceView.holder
+        holder.addCallback(object : SurfaceHolder.Callback {
+            override fun surfaceCreated(holder: SurfaceHolder) {
+            }
+
+            override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
+            }
+
+            override fun surfaceDestroyed(holder: SurfaceHolder) {
+            }
+        })
 
         if (allPermissionsGranted()) {
             // permissionは得られているので、カメラ始動
@@ -57,12 +70,6 @@ class MainActivity : AppCompatActivity() {
                 REQUEST_CODE_PERMISSIONS
             )
         }
-
-        val options = BarcodeScannerOptions.Builder()
-            .setBarcodeFormats(
-                Barcode.FORMAT_QR_CODE,
-                Barcode.FORMAT_AZTEC)
-            .build()
     }
 
     override fun onRequestPermissionsResult(
@@ -82,6 +89,13 @@ class MainActivity : AppCompatActivity() {
                     Toast.LENGTH_SHORT).show()
                 finish()
             }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        for(detector in detectors){
+            detector.release()
         }
     }
 
@@ -110,10 +124,10 @@ class MainActivity : AppCompatActivity() {
                 val mediaImage = imageProxy.image
                 if (mediaImage != null) {
                     val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
-                    detectFaces(image)
-                    scanBarcodes(image)
+                    for(detector in detectors){
+                        detector.detect(image)
+                    }
                     // Pass image to an ML Kit Vision API
-                    // ...
                 }
                 // insert your code here.
                 // after done, release the ImageProxy object
@@ -134,93 +148,17 @@ class MainActivity : AppCompatActivity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
-    private fun detectFaces(image: InputImage) {
-        val detector = FaceImageDetector()
-
-        // [START run_detector]
-        detector.detect(image).addOnSuccessListener { faces ->
-            // Task completed successfully
-            // [START_EXCLUDE]
-            // [START get_face_info]
-            for (face in faces) {
-                val bounds = face.boundingBox
-                val rotX = face.headEulerAngleX // Head is rotated to the right rotX degrees
-                val rotY = face.headEulerAngleY // Head is rotated to the right rotY degrees
-                val rotZ = face.headEulerAngleZ // Head is tilted sideways rotZ degrees
-                Log.d(TAG, "faceBounds:$bounds faceRotX:$rotX faceRotY:$rotY faceRotZ:$rotZ")
-
-                // If classification was enabled:
-                if (face.smilingProbability != null) {
-                    val smileProb = face.smilingProbability
-                    Log.d(TAG, "smileProb:$smileProb")
-                }
-                if (face.leftEyeOpenProbability != null) {
-                    val leftEyeOpenProb = face.leftEyeOpenProbability
-                    Log.d(TAG, "leftEyeOpenProb:$leftEyeOpenProb")
-                }
-                if (face.rightEyeOpenProbability != null) {
-                    val rightEyeOpenProb = face.rightEyeOpenProbability
-                    Log.d(TAG, "rightEyeOpenProb:$rightEyeOpenProb")
-                }
-
-                // If face tracking was enabled:
-                if (face.trackingId != null) {
-                    val id = face.trackingId
-                    Log.d(TAG, "faceId:$id")
-                }
-            }
-            // [END get_face_info]
-        }.addOnFailureListener { e ->
-            // Task failed with an exception
-        }
-        // [END run_detector]
-    }
-
-    private fun scanBarcodes(image: InputImage) {
-        val scanner = BarcodeImageDetector()
-        scanner.detect(image).addOnSuccessListener { barcodes ->
-            // Task completed successfully
-            // [START_EXCLUDE]
-            // [START get_barcodes]
-            for (barcode in barcodes) {
-                val bounds = barcode.boundingBox
-                val corners = barcode.cornerPoints
-                val rawValue = barcode.rawValue
-                val valueType = barcode.valueType
-                Log.d(TAG, "barCodeBounds:$bounds barCodeRawValue:$rawValue barcodeValueType:$valueType barcodeCornersCount:${corners}")
-                // See API reference for complete list of supported types
-                when (valueType) {
-                    Barcode.TYPE_WIFI -> {
-                        val ssid = barcode.wifi!!.ssid
-                        val password = barcode.wifi!!.password
-                        val type = barcode.wifi!!.encryptionType
-                    }
-                    Barcode.TYPE_URL -> {
-                        val title = barcode.url!!.title
-                        val url = barcode.url!!.url
-                        Log.d(TAG, "barCodeTitle:$title barCodeUrl:$url")
-                    }
-                }
-            }
-            // [END get_barcodes]
-            // [END_EXCLUDE]
-        }.addOnFailureListener {
-            // Task failed with an exception
-        }
-        // [END run_detector]
-    }
-
     /**
      * Get the angle by which an image must be rotated given the device's current
      * orientation.
      */
     @Throws(CameraAccessException::class)
     private fun getRotationCompensation(cameraId: String, activity: Activity, isFrontFacing: Boolean): Int {
-        val ORIENTATIONS = SparseIntArray()
-        ORIENTATIONS.append(Surface.ROTATION_0, 0)
-        ORIENTATIONS.append(Surface.ROTATION_90, 90)
-        ORIENTATIONS.append(Surface.ROTATION_180, 180)
-        ORIENTATIONS.append(Surface.ROTATION_270, 270)
+        val orientations = SparseIntArray()
+        orientations.append(Surface.ROTATION_0, 0)
+        orientations.append(Surface.ROTATION_90, 90)
+        orientations.append(Surface.ROTATION_180, 180)
+        orientations.append(Surface.ROTATION_270, 270)
         // Get the device's current rotation relative to its "native" orientation.
         // Then, from the ORIENTATIONS table, look up the angle the image must be
         // rotated to compensate for the device's rotation.
@@ -233,7 +171,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             this.windowManager.defaultDisplay.rotation
         }
-        var rotationCompensation = ORIENTATIONS.get(deviceRotation)
+        var rotationCompensation = orientations.get(deviceRotation)
 
         // Get the device's sensor orientation.
         val cameraManager = activity.getSystemService(CAMERA_SERVICE) as CameraManager
@@ -260,7 +198,7 @@ class MainActivity : AppCompatActivity() {
         init {
             System.loadLibrary("mlkitsample")
         }
-        private const val TAG = "MLKitSample"
+        public const val TAG = "MLKitSample"
         private const val REQUEST_CODE_PERMISSIONS = 10
         // 必要なpermissionのリスト
         private val REQUIRED_PERMISSIONS =

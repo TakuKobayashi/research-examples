@@ -1,13 +1,13 @@
 package net.taptappun.taku.kobayashi.mlkitsample
 
-import com.google.android.gms.tasks.Task
+import android.util.Log
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.Face
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
 
 class FaceImageDetector : ImageDetector<Face>() {
-    override public fun detect(image: InputImage): Task<MutableList<Face>> {
+    override public fun detect(image: InputImage) {
         // High-accuracy landmark detection and face classification
         /*
         val highAccuracyOpts = FaceDetectorOptions.Builder()
@@ -39,6 +39,44 @@ class FaceImageDetector : ImageDetector<Face>() {
         // [END get_detector]
 
         // [START run_detector]
-        return detector.process(image)
+        detector.process(image)
+            .addOnSuccessListener { faces -> renderDetectMarks(faces) }
+            .addOnFailureListener { e ->
+                // Task failed with an exception
+            }
+        // [END run_detector]
+    }
+
+    override fun renderDetectMarks(detects: MutableList<Face>) {
+        // Task completed successfully
+        // [START_EXCLUDE]
+        // [START get_face_info]
+        for (face in detects) {
+            val bounds = face.boundingBox
+            val rotX = face.headEulerAngleX // Head is rotated to the right rotX degrees
+            val rotY = face.headEulerAngleY // Head is rotated to the right rotY degrees
+            val rotZ = face.headEulerAngleZ // Head is tilted sideways rotZ degrees
+            Log.d(MainActivity.TAG, "faceBounds:$bounds faceRotX:$rotX faceRotY:$rotY faceRotZ:$rotZ")
+
+            // If classification was enabled:
+            if (face.smilingProbability != null) {
+                val smileProb = face.smilingProbability
+                Log.d(MainActivity.TAG, "smileProb:$smileProb")
+            }
+            if (face.leftEyeOpenProbability != null) {
+                val leftEyeOpenProb = face.leftEyeOpenProbability
+                Log.d(MainActivity.TAG, "leftEyeOpenProb:$leftEyeOpenProb")
+            }
+            if (face.rightEyeOpenProbability != null) {
+                val rightEyeOpenProb = face.rightEyeOpenProbability
+                Log.d(MainActivity.TAG, "rightEyeOpenProb:$rightEyeOpenProb")
+            }
+
+            // If face tracking was enabled:
+            if (face.trackingId != null) {
+                val id = face.trackingId
+                Log.d(MainActivity.TAG, "faceId:$id")
+            }
+        }
     }
 }

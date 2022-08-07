@@ -1,5 +1,6 @@
 package net.taptappun.taku.kobayashi.mlkitsample
 
+import android.util.Log
 import com.google.android.gms.tasks.Task
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
@@ -9,7 +10,7 @@ import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
 
 class BarcodeImageDetector : ImageDetector<Barcode>() {
-    override public fun detect(image: InputImage): Task<MutableList<Barcode>> {
+    override public fun detect(image: InputImage) {
         // [START set_detector_options]
         // Format: https://zenn.dev/mochico/articles/0c1f1104852659
         // https://developers.google.com/ml-kit/vision/barcode-scanning/android
@@ -29,6 +30,36 @@ class BarcodeImageDetector : ImageDetector<Barcode>() {
         // [END get_detector]
 
         // [START run_detector]
-        return scanner.process(image)
+        scanner.process(image).addOnSuccessListener { barcodes -> renderDetectMarks(barcodes) }.addOnFailureListener {
+            // Task failed with an exception
+        }
+    }
+
+    override fun renderDetectMarks(detects: MutableList<Barcode>) {
+        // Task completed successfully
+        // [START_EXCLUDE]
+        // [START get_barcodes]
+        for (barcode in detects) {
+            val bounds = barcode.boundingBox
+            val corners = barcode.cornerPoints
+            val rawValue = barcode.rawValue
+            val valueType = barcode.valueType
+            Log.d(MainActivity.TAG, "barCodeBounds:$bounds barCodeRawValue:$rawValue barcodeValueType:$valueType barcodeCornersCount:${corners}")
+            // See API reference for complete list of supported types
+            when (valueType) {
+                Barcode.TYPE_WIFI -> {
+                    val ssid = barcode.wifi!!.ssid
+                    val password = barcode.wifi!!.password
+                    val type = barcode.wifi!!.encryptionType
+                }
+                Barcode.TYPE_URL -> {
+                    val title = barcode.url!!.title
+                    val url = barcode.url!!.url
+                    Log.d(MainActivity.TAG, "barCodeTitle:$title barCodeUrl:$url")
+                }
+            }
+        }
+        // [END get_barcodes]
+        // [END_EXCLUDE]
     }
 }
