@@ -23,6 +23,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
+import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.FaceDetection
@@ -110,6 +111,7 @@ class MainActivity : AppCompatActivity() {
                 if (mediaImage != null) {
                     val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
                     detectFaces(image)
+                    scanBarcodes(image)
                     // Pass image to an ML Kit Vision API
                     // ...
                 }
@@ -197,6 +199,58 @@ class MainActivity : AppCompatActivity() {
             }
             // [END get_face_info]
         }.addOnFailureListener { e ->
+            // Task failed with an exception
+        }
+        // [END run_detector]
+    }
+
+    private fun scanBarcodes(image: InputImage) {
+        // [START set_detector_options]
+        // Format: https://zenn.dev/mochico/articles/0c1f1104852659
+        // https://developers.google.com/ml-kit/vision/barcode-scanning/android
+        /*
+        val options = BarcodeScannerOptions.Builder()
+            .setBarcodeFormats(
+                Barcode.FORMAT_QR_CODE,
+                Barcode.FORMAT_AZTEC)
+            .build()
+        */
+        // [END set_detector_options]
+
+        // [START get_detector]
+        val scanner = BarcodeScanning.getClient()
+        // Or, to specify the formats to recognize:
+//        val scanner = BarcodeScanning.getClient(options)
+        // [END get_detector]
+
+        // [START run_detector]
+        scanner.process(image).addOnSuccessListener { barcodes ->
+            // Task completed successfully
+            // [START_EXCLUDE]
+            // [START get_barcodes]
+            for (barcode in barcodes) {
+                val bounds = barcode.boundingBox
+                val corners = barcode.cornerPoints
+                val rawValue = barcode.rawValue
+                val valueType = barcode.valueType
+                Log.d(TAG, "barCodeBounds:$bounds barCodeRawValue:$rawValue barcodeValueType:$valueType barcodeCornersCount:${corners}")
+                // See API reference for complete list of supported types
+                when (valueType) {
+                    Barcode.TYPE_WIFI -> {
+                        val ssid = barcode.wifi!!.ssid
+                        val password = barcode.wifi!!.password
+                        val type = barcode.wifi!!.encryptionType
+                    }
+                    Barcode.TYPE_URL -> {
+                        val title = barcode.url!!.title
+                        val url = barcode.url!!.url
+                        Log.d(TAG, "barCodeTitle:$title barCodeUrl:$url")
+                    }
+                }
+            }
+            // [END get_barcodes]
+            // [END_EXCLUDE]
+        }.addOnFailureListener {
             // Task failed with an exception
         }
         // [END run_detector]
