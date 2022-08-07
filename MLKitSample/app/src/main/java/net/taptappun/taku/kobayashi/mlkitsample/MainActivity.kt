@@ -135,38 +135,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun detectFaces(image: InputImage) {
-        // High-accuracy landmark detection and face classification
-        /*
-        val highAccuracyOpts = FaceDetectorOptions.Builder()
-            .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
-            .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
-            .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
-            .build()
-
-        // Real-time contour detection
-        val realTimeOpts = FaceDetectorOptions.Builder()
-            .setContourMode(FaceDetectorOptions.CONTOUR_MODE_ALL)
-            .build()
-         */
-
-        // [START set_detector_options]
-        val options = FaceDetectorOptions.Builder()
-            .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
-            .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
-            .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
-           // .setMinFaceSize(0.15f)
-            .enableTracking()
-            .build()
-        // [END set_detector_options]
-
-        // [START get_detector]
-        val detector = FaceDetection.getClient(options)
-        // Or, to use the default option:
-        // val detector = FaceDetection.getClient();
-        // [END get_detector]
+        val detector = FaceImageDetector()
 
         // [START run_detector]
-        detector.process(image).addOnSuccessListener { faces ->
+        detector.detect(image).addOnSuccessListener { faces ->
             // Task completed successfully
             // [START_EXCLUDE]
             // [START get_face_info]
@@ -205,26 +177,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun scanBarcodes(image: InputImage) {
-        // [START set_detector_options]
-        // Format: https://zenn.dev/mochico/articles/0c1f1104852659
-        // https://developers.google.com/ml-kit/vision/barcode-scanning/android
-        /*
-        val options = BarcodeScannerOptions.Builder()
-            .setBarcodeFormats(
-                Barcode.FORMAT_QR_CODE,
-                Barcode.FORMAT_AZTEC)
-            .build()
-        */
-        // [END set_detector_options]
-
-        // [START get_detector]
-        val scanner = BarcodeScanning.getClient()
-        // Or, to specify the formats to recognize:
-//        val scanner = BarcodeScanning.getClient(options)
-        // [END get_detector]
-
-        // [START run_detector]
-        scanner.process(image).addOnSuccessListener { barcodes ->
+        val scanner = BarcodeImageDetector()
+        scanner.detect(image).addOnSuccessListener { barcodes ->
             // Task completed successfully
             // [START_EXCLUDE]
             // [START get_barcodes]
