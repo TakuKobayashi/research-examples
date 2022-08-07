@@ -1,6 +1,7 @@
 package net.taptappun.taku.kobayashi.mlkitsample
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.pm.PackageManager
 import android.hardware.camera2.CameraAccessException
@@ -23,6 +24,10 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.common.Barcode
+import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.face.FaceDetection
+import com.google.mlkit.vision.face.FaceDetectorOptions
+import com.google.mlkit.vision.face.FaceLandmark
 import net.taptappun.taku.kobayashi.mlkitsample.databinding.ActivityMainBinding
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -83,6 +88,7 @@ class MainActivity : AppCompatActivity() {
         ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
     }
 
+    @SuppressLint("UnsafeOptInUsageError")
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
@@ -96,11 +102,17 @@ class MainActivity : AppCompatActivity() {
 
             val imageAnalysis = ImageAnalysis.Builder()
                 // enable the following line if RGBA output is needed.
-                .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
+                //.setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
             imageAnalysis.setAnalyzer(imageAnalysisExecutor, ImageAnalysis.Analyzer { imageProxy ->
-                val rotationDegrees = imageProxy.imageInfo.rotationDegrees
+                val mediaImage = imageProxy.image
+                if (mediaImage != null) {
+                    val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
+                    detectFaces(image)
+                    // Pass image to an ML Kit Vision API
+                    // ...
+                }
                 // insert your code here.
                 // after done, release the ImageProxy object
                 imageProxy.close()
@@ -118,6 +130,76 @@ class MainActivity : AppCompatActivity() {
                 imageAnalysis
             )
         }, ContextCompat.getMainExecutor(this))
+    }
+
+    private fun detectFaces(image: InputImage) {
+        // High-accuracy landmark detection and face classification
+        /*
+        val highAccuracyOpts = FaceDetectorOptions.Builder()
+            .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
+            .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
+            .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
+            .build()
+
+        // Real-time contour detection
+        val realTimeOpts = FaceDetectorOptions.Builder()
+            .setContourMode(FaceDetectorOptions.CONTOUR_MODE_ALL)
+            .build()
+         */
+
+        // [START set_detector_options]
+        val options = FaceDetectorOptions.Builder()
+            .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
+            .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_ALL)
+            .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
+           // .setMinFaceSize(0.15f)
+            .enableTracking()
+            .build()
+        // [END set_detector_options]
+
+        // [START get_detector]
+        val detector = FaceDetection.getClient(options)
+        // Or, to use the default option:
+        // val detector = FaceDetection.getClient();
+        // [END get_detector]
+
+        // [START run_detector]
+        detector.process(image).addOnSuccessListener { faces ->
+            // Task completed successfully
+            // [START_EXCLUDE]
+            // [START get_face_info]
+            for (face in faces) {
+                val bounds = face.boundingBox
+                val rotX = face.headEulerAngleX // Head is rotated to the right rotX degrees
+                val rotY = face.headEulerAngleY // Head is rotated to the right rotY degrees
+                val rotZ = face.headEulerAngleZ // Head is tilted sideways rotZ degrees
+                Log.d(TAG, "faceBounds:$bounds faceRotX:$rotX faceRotY:$rotY faceRotZ:$rotZ")
+
+                // If classification was enabled:
+                if (face.smilingProbability != null) {
+                    val smileProb = face.smilingProbability
+                    Log.d(TAG, "smileProb:$smileProb")
+                }
+                if (face.leftEyeOpenProbability != null) {
+                    val leftEyeOpenProb = face.leftEyeOpenProbability
+                    Log.d(TAG, "leftEyeOpenProb:$leftEyeOpenProb")
+                }
+                if (face.rightEyeOpenProbability != null) {
+                    val rightEyeOpenProb = face.rightEyeOpenProbability
+                    Log.d(TAG, "rightEyeOpenProb:$rightEyeOpenProb")
+                }
+
+                // If face tracking was enabled:
+                if (face.trackingId != null) {
+                    val id = face.trackingId
+                    Log.d(TAG, "faceId:$id")
+                }
+            }
+            // [END get_face_info]
+        }.addOnFailureListener { e ->
+            // Task failed with an exception
+        }
+        // [END run_detector]
     }
 
     /**
@@ -170,7 +252,7 @@ class MainActivity : AppCompatActivity() {
         init {
             System.loadLibrary("mlkitsample")
         }
-        private val TAG = MainActivity::class.java.simpleName
+        private const val TAG = "MLKitSample"
         private const val REQUEST_CODE_PERMISSIONS = 10
         // 必要なpermissionのリスト
         private val REQUIRED_PERMISSIONS =
