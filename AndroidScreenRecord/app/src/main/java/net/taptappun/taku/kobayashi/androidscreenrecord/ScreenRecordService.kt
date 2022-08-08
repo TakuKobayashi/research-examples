@@ -184,6 +184,7 @@ class ScreenRecordService : Service() {
             format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 0)
             codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
             codec.start();
+            val mediaMuxer = new MediaMuxer(outputFile, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
             */
 
             // DISPLAYMANAGERの仮想ディスプレイ表示条件
