@@ -1,11 +1,14 @@
 package net.taptappun.taku.kobayashi.androidscreenrecord
 
+import android.annotation.SuppressLint
 import android.app.*
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
+import android.graphics.PixelFormat
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
+import android.media.ImageReader
 import android.media.MediaRecorder
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
@@ -13,6 +16,7 @@ import android.os.Build
 import android.os.IBinder
 import android.provider.MediaStore
 import android.util.Log
+import androidx.annotation.RequiresApi
 import java.io.FileDescriptor
 
 // 参考: https://takusan23.github.io/Bibouroku/2020/04/06/MediaProjection/
@@ -22,6 +26,7 @@ class ScreenRecordService : Service() {
     lateinit var projectionManager: MediaProjectionManager
     lateinit var projection: MediaProjection
     lateinit var virtualDisplay: VirtualDisplay
+    lateinit var imageReader: ImageReader
 
     override fun onBind(intent: Intent?): IBinder? {
         Log.d(MainActivity.TAG, "onBind")
@@ -61,6 +66,7 @@ class ScreenRecordService : Service() {
     }
 
     //録画開始
+    @SuppressLint("WrongConstant")
     private fun startRec(intent: Intent) {
         val data: Intent? = intent.getParcelableExtra("data")
         val code = intent.getIntExtra("code", Activity.RESULT_OK)
@@ -77,6 +83,8 @@ class ScreenRecordService : Service() {
 
             //codeはActivity.RESULT_OKとかが入る。
             projection = projectionManager.getMediaProjection(code, data)
+            imageReader = ImageReader.newInstance(width , height, PixelFormat.RGBA_8888, 2)
+            imageReader.setOnImageAvailableListener(imageReaderListener, null)
 
             mediaRecorder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 MediaRecorder(this)
@@ -94,6 +102,12 @@ class ScreenRecordService : Service() {
             mediaRecorder.setAudioSamplingRate(44100)
             val fileDescriptor = getWillSaveFileDescriptor()
             mediaRecorder.setOutputFile(fileDescriptor)
+            // surfaceをいれるためにはMediaCodicで録画できるように試みる必要がある
+            // https://developer.android.com/reference/android/media/MediaCodec
+            // じゃないと java.lang.IllegalArgumentException: not a PersistentSurface というエラーが出る
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                mediaRecorder.setInputSurface(imageReader.surface)
+            }
             mediaRecorder.prepare()
 
             // DISPLAYMANAGERの仮想ディスプレイ表示条件
@@ -109,7 +123,8 @@ class ScreenRecordService : Service() {
                 height,
                 dpi,
                 DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
-                mediaRecorder.surface,
+//                mediaRecorder.surface,
+                imageReader.surface,
                 object : VirtualDisplay.Callback() {
                     override fun onPaused() {
                         Log.d(MainActivity.TAG, "VirtualDisplay onPaused")
@@ -133,10 +148,21 @@ class ScreenRecordService : Service() {
 
     //録画止める
     private fun stopRec() {
-        mediaRecorder.stop()
+        // 何にも録画していないのにstartしているとstopの時に stop failed. というエラーが出ちゃう
+        //mediaRecorder.stop()
         mediaRecorder.release()
+        imageReader.close()
         virtualDisplay.release()
         projection.stop()
+    }
+
+    private val imageReaderListener = ImageReader.OnImageAvailableListener { reader: ImageReader ->
+        val image = reader.acquireLatestImage()
+        Log.d(MainActivity.TAG, "width:${image.width} height:${image.height} planeSize:${image.planes.size}")
+        for(imagePlane in image.planes) {
+            Log.d(MainActivity.TAG, "rowStride:${imagePlane.rowStride} pixelStride:${imagePlane.pixelStride}")
+        }
+        image.close()
     }
 
     //保存先取得。今回は対象範囲別ストレージに保存する
