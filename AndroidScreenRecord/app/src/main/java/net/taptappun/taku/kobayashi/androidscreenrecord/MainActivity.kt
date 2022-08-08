@@ -5,12 +5,12 @@ import android.app.Activity
 import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
+import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
+import android.provider.Settings
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
@@ -19,14 +19,13 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var mediaProjectionManager: MediaProjectionManager
 
     // 参考:
     // https://buildersbox.corp-sansan.com/entry/2020/05/27/110000
     // https://qiita.com/yass97/items/62cccfad5190cc4d4fa6
     // onResume寄りまで定義しないとこんな感じのエラーがでてしまう
     // LifecycleOwner is attempting to register while current state is RESUMED. LifecycleOwners must call register before they are STARTED.
-    private val startActivityForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+    private val mediaProjectionStartActivityForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             result: ActivityResult ->
         if (result.resultCode == Activity.RESULT_OK && result.data != null) {
             val intent = Intent(this, ScreenRecordService::class.java)
@@ -46,15 +45,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private val settingsStartActivityForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        mediaProjectionManager = getSystemService(Service.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
         val recordStartButton = findViewById<Button>(R.id.recordStartButton)
         recordStartButton.setOnClickListener { v ->
             if (allPermissionsGranted()) {
-                startActivityForResult.launch(mediaProjectionManager.createScreenCaptureIntent())
+                val mediaProjectionManager = getSystemService(Service.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+                mediaProjectionStartActivityForResult.launch(mediaProjectionManager.createScreenCaptureIntent())
             } else {
                 // permission許可要求
                 ActivityCompat.requestPermissions(
@@ -71,6 +73,23 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, ScreenRecordService::class.java)
             stopService(intent)
         }
+
+        // 参考: https://stackoverflow.com/questions/39911377/settings-candrawoverlays-for-api-23
+        if (Build.VERSION.SDK_INT >= 23){
+            if(Settings.canDrawOverlays(this)){
+            //...
+            } else {
+                Toast.makeText(
+                    this,
+                    "画面上のオーバーレイする設定を有効にしてください",
+                    Toast.LENGTH_SHORT
+                ).show()
+                // 許可されていない
+                val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"));
+                // 設定画面に移行
+                settingsStartActivityForResult.launch(intent);
+            }
+        }
     }
 
     private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
@@ -86,7 +105,8 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
             if (allPermissionsGranted()) {
-                startActivityForResult.launch(mediaProjectionManager.createScreenCaptureIntent())
+                val mediaProjectionManager = getSystemService(Service.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+                mediaProjectionStartActivityForResult.launch(mediaProjectionManager.createScreenCaptureIntent())
             } else {
                 Toast.makeText(
                     this,
