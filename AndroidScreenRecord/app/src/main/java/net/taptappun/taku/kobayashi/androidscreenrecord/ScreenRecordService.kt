@@ -15,9 +15,14 @@ import android.media.projection.MediaProjectionManager
 import android.os.Build
 import android.os.IBinder
 import android.provider.MediaStore
+import android.provider.Settings
 import android.util.Log
-import androidx.annotation.RequiresApi
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
 import java.io.FileDescriptor
+
 
 // 参考: https://takusan23.github.io/Bibouroku/2020/04/06/MediaProjection/
 class ScreenRecordService : Service() {
@@ -27,6 +32,17 @@ class ScreenRecordService : Service() {
     lateinit var projection: MediaProjection
     lateinit var virtualDisplay: VirtualDisplay
     lateinit var imageReader: ImageReader
+    private lateinit var overlayView: View
+    private lateinit var windowManager: WindowManager
+
+    override fun onCreate() {
+        super.onCreate()
+        val layoutInflater = LayoutInflater.from(this)
+
+        // レイアウトファイルからInfalteするViewを作成
+        overlayView = layoutInflater.inflate(R.layout.overlay_view, null)
+        windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    }
 
     override fun onBind(intent: Intent?): IBinder? {
         Log.d(MainActivity.TAG, "onBind")
@@ -61,8 +77,29 @@ class ScreenRecordService : Service() {
             .build()
 
         startForeground(1, notification)
+        if (Build.VERSION.SDK_INT < 23 || Settings.canDrawOverlays(this)){
+            showWindowOverlay()
+        }
         startRec(intent)
         return START_NOT_STICKY
+    }
+
+    private fun showWindowOverlay(){
+        val windowType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        }else {
+            //WindowManager.LayoutParams.TYPE_SYSTEM_ALERT
+            WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY
+        }
+        val layoutParams = WindowManager.LayoutParams(
+                windowType,  // Overlay レイヤに表示
+          WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE  // フォーカスを奪わない
+                    or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE // 画面の操作を無効化(タップを受け付けない)
+                    or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL // これがないとedittextをおしてもキーボードが反応しないようだ
+                    or WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,  // 画面外への拡張を許可
+            // viewを透明にする
+            PixelFormat.TRANSLUCENT)
+        windowManager.addView(overlayView, layoutParams);
     }
 
     //録画開始
@@ -123,8 +160,8 @@ class ScreenRecordService : Service() {
                 height,
                 dpi,
                 DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
-//                mediaRecorder.surface,
-                imageReader.surface,
+                mediaRecorder.surface,
+                //imageReader.surface,
                 object : VirtualDisplay.Callback() {
                     override fun onPaused() {
                         Log.d(MainActivity.TAG, "VirtualDisplay onPaused")
@@ -189,6 +226,9 @@ class ScreenRecordService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         Log.d(MainActivity.TAG, "onDestroy")
+        if (Build.VERSION.SDK_INT < 23 || Settings.canDrawOverlays(this)){
+            windowManager.removeView(overlayView);
+        }
         stopRec()
     }
 }
