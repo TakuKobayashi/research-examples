@@ -1,5 +1,6 @@
 package net.taptappun.taku.kobayashi.androidscreenrecord
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.*
 import android.content.ContentValues
@@ -9,6 +10,8 @@ import android.graphics.PixelFormat
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
 import android.media.ImageReader
+import android.media.MediaCodecInfo
+import android.media.MediaCodecList
 import android.media.MediaRecorder
 import android.media.projection.MediaProjection
 import android.media.projection.MediaProjectionManager
@@ -19,7 +22,6 @@ import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.view.WindowManager
 import java.io.FileDescriptor
 
@@ -147,6 +149,43 @@ class ScreenRecordService : Service() {
             }
             mediaRecorder.prepare()
 
+            /*
+            val mediaCodecInfo = selectCodec(MIME_TYPE)
+            val codec = MediaCodec.createByCodecName(mediaCodecInfo?.name.toString());
+            codec.setCallback(object : MediaCodec.Callback() {
+                override fun onInputBufferAvailable(codec: MediaCodec, index: Int) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onOutputBufferAvailable(
+                    codec: MediaCodec,
+                    index: Int,
+                    info: MediaCodec.BufferInfo
+                ) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onError(codec: MediaCodec, e: MediaCodec.CodecException) {
+                    TODO("Not yet implemented")
+                }
+
+                override fun onOutputFormatChanged(codec: MediaCodec, format: MediaFormat) {
+                    TODO("Not yet implemented")
+                }
+            })
+
+            val format = MediaFormat.createVideoFormat(MIME_TYPE, width, height)
+            format.setInteger(
+                MediaFormat.KEY_COLOR_FORMAT,
+                MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible
+            )
+            format.setInteger(MediaFormat.KEY_BIT_RATE, 1080 * 10000)
+            format.setInteger(MediaFormat.KEY_FRAME_RATE, 30)
+            format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 0)
+            codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
+            codec.start();
+            */
+
             // DISPLAYMANAGERの仮想ディスプレイ表示条件
             // VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR	コンテンツをミラーリング表示する
             // VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY	独自のコンテンツを表示。ミラーリングしない
@@ -199,6 +238,26 @@ class ScreenRecordService : Service() {
         for(imagePlane in image.planes) {
             Log.d(MainActivity.TAG, "rowStride:${imagePlane.rowStride} pixelStride:${imagePlane.pixelStride}")
         }
+        /*
+        val planes = image.planes
+        val yPlane = planes[0]
+        val uPlane = planes[1]
+        val vPlane = planes[2]
+        val mBuffer: ByteArray = yuvToBuffer(
+            yPlane.getBuffer(),
+            uPlane.getBuffer(),
+            vPlane.getBuffer(),
+            yPlane.getPixelStride(),
+            yPlane.getRowStride(),
+            uPlane.getPixelStride(),
+            uPlane.getRowStride(),
+            vPlane.getPixelStride(),
+            vPlane.getRowStride(),
+            image.width,
+            image.height
+        )
+        mQueue.add(MyData(mBuffer, image.timestamp, false))
+        */
         image.close()
     }
 
@@ -230,5 +289,25 @@ class ScreenRecordService : Service() {
             windowManager.removeView(overlayView);
         }
         stopRec()
+    }
+
+    private fun selectCodec(mimeType: String): MediaCodecInfo? {
+        val codecInfos = MediaCodecList(MediaCodecList.ALL_CODECS).codecInfos;
+        for(codecInfo in codecInfos){
+            if (!codecInfo.isEncoder) {
+                continue
+            }
+            val types = codecInfo.supportedTypes
+            for (j in types.indices) {
+                if (types[j].equals(mimeType, ignoreCase = true)) {
+                    return codecInfo
+                }
+            }
+        }
+        return null
+    }
+
+    companion object {
+        private const val MIME_TYPE = "video/avc" // H.264 Advanced Video Coding
     }
 }
