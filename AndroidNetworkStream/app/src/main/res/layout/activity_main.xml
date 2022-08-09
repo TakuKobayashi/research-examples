@@ -1,19 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:layout_height="match_parent">
 
     <TextView
         android:id="@+id/sample_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_centerInParent="true"
+        android:text="Hello World!" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <org.webrtc.SurfaceViewRenderer
+        android:id="@+id/fullscreenVideoView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignLeft="@+id/spacer"
+        android:layout_alignParentLeft="true"
+        android:layout_above="@+id/buttonCallSwitchCamera"/>
+
+    <org.webrtc.SurfaceViewRenderer
+        android:id="@+id/pipVideoView"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:layout_alignParentRight="true"
+        android:layout_alignRight="@+id/spacer"
+        android:layout_above="@+id/buttonCallSwitchCamera"/>
+
+    <View
+        android:id="@+id/spacer"
+        android:layout_height="1px"
+        android:layout_width="1px"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/buttonCallSwitchCamera"/>
+
+    <Button
+        android:id="@+id/buttonCallDisconnect"
+        android:text="disconnect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/buttonCallSwitchCamera"/>
+
+    <Button
+        android:id="@+id/buttonCallSwitchCamera"
+        android:text="Switch Camera"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/buttonCalltoggleMic"/>
+
+    <Button
+        android:id="@+id/buttonCalltoggleMic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Call Mic"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"/>
+
+
+</RelativeLayout>
