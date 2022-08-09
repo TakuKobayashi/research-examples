@@ -12,7 +12,10 @@
   },
   "dependencies": {
     "@fastify/aws-lambda": "^3.1.1",
-    "fastify": "^4.4.0"
+    "chrome-aws-lambda": "^10.1.0",
+    "fastify": "^4.4.0",
+    "puppeteer": "^16.1.0",
+    "puppeteer-core": "^16.1.0"
   },
   "devDependencies": {
     "@serverless/typescript": "^3.21.0",
