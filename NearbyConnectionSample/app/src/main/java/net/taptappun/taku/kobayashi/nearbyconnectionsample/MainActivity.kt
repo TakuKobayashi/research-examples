@@ -1,8 +1,12 @@
 package net.taptappun.taku.kobayashi.nearbyconnectionsample
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.AdvertisingOptions
 import com.google.android.gms.nearby.connection.DiscoveryOptions
@@ -20,7 +24,7 @@ import net.taptappun.taku.kobayashi.nearbyconnectionsample.databinding.ActivityM
 import java.util.UUID
 
 class MainActivity : AppCompatActivity() {
-
+    private val connectingEndpointIds = mutableSetOf<String>()
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,9 +36,41 @@ class MainActivity : AppCompatActivity() {
         binding.advertisingStartButton.setOnClickListener {
             startNearbyAdvertising()
         }
-        binding.advertisingStartButton.setOnClickListener {
+        binding.discoveryStartButton.setOnClickListener {
             startDiscovery()
         }
+        if (allPermissionsGranted()) {
+        } else {
+            // permission許可要求
+            ActivityCompat.requestPermissions(
+                this,
+                REQUIRED_PERMISSIONS,
+                REQUEST_CODE_PERMISSIONS
+            )
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults:
+        IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_CODE_PERMISSIONS) {
+            if (allPermissionsGranted()) {
+            } else {
+                Toast.makeText(
+                    this,
+                    "Permissions not granted by the user.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
+        ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
     }
 
     private fun startNearbyAdvertising() {
@@ -90,8 +126,6 @@ class MainActivity : AppCompatActivity() {
             // 見つけたエンドポイントを見失った
         }
     }
-
-    private val connectingEndpointIds = mutableSetOf<String>()
 
     private val mConnectionLifecycleCallback = object : ConnectionLifecycleCallback() {
 
@@ -170,5 +204,12 @@ class MainActivity : AppCompatActivity() {
             System.loadLibrary("nearbyconnectionsample")
         }
         const val TAG = "NearbyConnectionSample"
+        private const val REQUEST_CODE_PERMISSIONS = 10
+        private val REQUIRED_PERMISSIONS =
+            mutableListOf(
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+            ).toTypedArray()
     }
 }
