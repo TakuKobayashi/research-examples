@@ -2,7 +2,9 @@ package net.taptappun.taku.kobayashi.nearbyconnectionsample
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -78,9 +80,11 @@ class MainActivity : AppCompatActivity() {
             .setStrategy(Strategy.P2P_STAR)
             .build()
         val nearbyConnectionClient = Nearby.getConnectionsClient(applicationContext)
+        // startAdvertising: 自分の近くでdiscoveryしている人を探す
         nearbyConnectionClient.startAdvertising(
-            UUID.randomUUID().toString(),
-            UUID.randomUUID().toString(),
+            // ここは自分のニックネームの情報を送る
+            "test",
+            packageName,
             mConnectionLifecycleCallback,
             advertisingOptions
         )
@@ -100,7 +104,7 @@ class MainActivity : AppCompatActivity() {
             .build()
         val nearbyConnectionClient = Nearby.getConnectionsClient(applicationContext)
         nearbyConnectionClient.startDiscovery(
-                UUID.randomUUID().toString(),
+                packageName,
                 mEndpointDiscoveryCallback,
                 discoveryOptions)
             .addOnSuccessListener {
@@ -116,10 +120,13 @@ class MainActivity : AppCompatActivity() {
     private val mEndpointDiscoveryCallback = object : EndpointDiscoveryCallback() {
         override fun onEndpointFound(endpointId: String, discoveredEndpointInfo: DiscoveredEndpointInfo) {
             // Advertise側を発見した
+            // discoveredEndpointInfo.endpointName: Advertisingで送った人のニックネームの情報を取得する
+            Log.d(TAG, "found:${endpointId} endpointName:${discoveredEndpointInfo.endpointName} serviceId:${discoveredEndpointInfo.serviceId}")
 
             val nearbyConnectionClient = Nearby.getConnectionsClient(applicationContext)
             // とりあえず問答無用でコネクション要求してみる
-            nearbyConnectionClient.requestConnection(UUID.randomUUID().toString(), endpointId, mConnectionLifecycleCallback)
+            // Connectionを要求する処理
+            nearbyConnectionClient.requestConnection("test", endpointId, mConnectionLifecycleCallback)
         }
 
         override fun onEndpointLost(endpointId: String) {
@@ -131,6 +138,7 @@ class MainActivity : AppCompatActivity() {
 
         override fun onConnectionInitiated(endpointId: String, connectionInfo: ConnectionInfo) {
             // 他の端末からコネクションのリクエストを受け取った時
+            Log.d(TAG, "connection:${endpointId} endpointName:${connectionInfo.endpointName}")
 
             val nearbyConnectionClient = Nearby.getConnectionsClient(applicationContext)
             // とりあえず来る者は拒まず即承認
@@ -139,7 +147,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun onConnectionResult(endpointId: String, result: ConnectionResolution) {
-
+            Log.d(TAG, "connectionResult:${endpointId} statusMessage:${result.status.statusMessage}")
             // コネクションリクエストの結果を受け取った時
 
             when (result.status.statusCode) {
@@ -161,6 +169,7 @@ class MainActivity : AppCompatActivity() {
 
         // コネクションが切断された時
         override fun onDisconnected(endpointId: String) {
+            Log.d(TAG, "disconnect:${endpointId}")
             connectingEndpointIds.remove(endpointId)
         }
 
@@ -168,6 +177,7 @@ class MainActivity : AppCompatActivity() {
 
     private val mPayloadCallback = object : PayloadCallback() {
         override fun onPayloadReceived(endpointId: String, payload: Payload) {
+            Log.d(TAG, "payloadReceived:${endpointId}")
             when (payload.type) {
                 Payload.Type.BYTES -> {
                     // バイト配列を受け取った時
@@ -189,6 +199,7 @@ class MainActivity : AppCompatActivity() {
 
         override fun onPayloadTransferUpdate(endpointId: String, update: PayloadTransferUpdate) {
             // 転送状態が更新された時詳細は省略
+            Log.d(TAG, "payloadUpdate:${endpointId}")
         }
     }
 
@@ -210,6 +221,12 @@ class MainActivity : AppCompatActivity() {
                 Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.READ_EXTERNAL_STORAGE,
-            ).toTypedArray()
+            ).apply {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    add(Manifest.permission.BLUETOOTH_ADVERTISE)
+                    add(Manifest.permission.BLUETOOTH_CONNECT)
+                    add(Manifest.permission.BLUETOOTH_SCAN)
+                }
+            }.toTypedArray()
     }
 }
