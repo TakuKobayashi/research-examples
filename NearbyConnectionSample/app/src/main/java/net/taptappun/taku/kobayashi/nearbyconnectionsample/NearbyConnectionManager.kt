@@ -14,6 +14,7 @@ import com.google.android.gms.nearby.connection.ConnectionsStatusCodes
 import com.google.android.gms.nearby.connection.PayloadCallback
 import com.google.android.gms.nearby.connection.ConnectionInfo
 import com.google.android.gms.nearby.connection.ConnectionResolution
+import com.google.android.gms.nearby.connection.Payload
 
 class NearbyConnectionManager(
     private val context: Context,
@@ -79,14 +80,20 @@ class NearbyConnectionManager(
     }
 
     fun acceptConnection(endpointId: String){
+        Log.d(MainActivity.TAG, "accept:${endpointId}")
         connectSuccessEndpointIds.add(endpointId)
         nearbyConnectionClient.acceptConnection(endpointId, payloadCallback)
     }
 
     fun rejectConnection(endpointId: String){
+        Log.d(MainActivity.TAG, "reject:${endpointId}")
         mayConnectingEndpointIdNicknames.remove(endpointId)
         connectSuccessEndpointIds.remove(endpointId)
         nearbyConnectionClient.rejectConnection(endpointId)
+    }
+
+    fun sendPayload(endpointId: String, payload: Payload){
+        nearbyConnectionClient.sendPayload(endpointId, payload)
     }
 
     fun setConnectionCallback(callback: ConnectionCallback){
@@ -112,7 +119,7 @@ class NearbyConnectionManager(
 
     private val connectionLifecycleCallback = object : ConnectionLifecycleCallback() {
         override fun onConnectionInitiated(endpointId: String, connectionInfo: ConnectionInfo) {
-            Log.d(MainActivity.TAG, "connectionResult:${endpointId} connectionInfo:${connectionInfo.endpointName} isIncomingConnection:${connectionInfo.isIncomingConnection}")
+            Log.d(MainActivity.TAG, "endpoint:${endpointId} connectionInfo:${connectionInfo.endpointName} isIncomingConnection:${connectionInfo.isIncomingConnection}")
             // 他の端末からコネクションのリクエストを受け取った時
             // とりあえず来る者は拒まず即承認
             // 承認した段階でコネクションが確立されたと仮定する
@@ -120,13 +127,15 @@ class NearbyConnectionManager(
             // isIncomingConnection: requestを受け取った場合はtrue、送った場合はfalse
             if(connectionInfo.isIncomingConnection){
                 connectionCallback?.onReceivedConnectionRequest(endpointId, connectionInfo)
+            } else {
+                // 自分から送っているのだから先に承認しちゃう
+                nearbyConnectionClient.acceptConnection(endpointId, payloadCallback)
             }
-            //connectSuccessEndpointIds.add(endpointId)
-            //nearbyConnectionClient.acceptConnection(endpointId, payloadCallback)
         }
 
+        // 送信・受信双方の合意または拒絶など結果が出たタイミングで両方ともで呼ばれる
         override fun onConnectionResult(endpointId: String, result: ConnectionResolution) {
-            Log.d(MainActivity.TAG, "connectionResult:${endpointId} code:${result.status.statusCode} statusMessage:${result.status.statusMessage}")
+            Log.d(MainActivity.TAG, "endpoint:${endpointId} code:${result.status.statusCode} statusMessage:${result.status.statusMessage}")
             // コネクションリクエストの結果を受け取った時
 
             when (result.status.statusCode) {
@@ -137,7 +146,7 @@ class NearbyConnectionManager(
                     // コネクションのリクエストが承認されたら見つかった一覧から取り除いてあげる
                     foundEndpoints.remove(endpointId)
                     // コネクションのリクエストが承認されたら、相手からの情報も受け取れるようにするためにこっちも承認する
-                    nearbyConnectionClient.acceptConnection(endpointId, payloadCallback)
+                    connectionCallback?.onConnectionSuccess(endpointId, mayConnectingEndpointIdNicknames[endpointId].toString())
                 }
 
                 ConnectionsStatusCodes.STATUS_CONNECTION_REJECTED -> {
@@ -166,6 +175,7 @@ class NearbyConnectionManager(
     interface ConnectionCallback {
         fun onDisconnected(endpointId: String)
         fun onReceivedConnectionRequest(endpointId: String, connectionInfo: ConnectionInfo)
+        fun onConnectionSuccess(endpointId: String, nickname: String)
         fun onEndpointFound(endpointId: String, discoveredEndpointInfo: DiscoveredEndpointInfo)
         fun onEndpointLost(endpointId: String)
     }

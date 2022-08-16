@@ -43,8 +43,44 @@
     <ListView
         android:id="@+id/discoveryFoundListView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/discoveryFoundLabelTextView"
-        android:layout_marginTop="0dp" />
+        android:layout_height="100dp"
+        android:layout_below="@+id/discoveryFoundLabelTextView" />
+
+    <RelativeLayout
+        android:id="@+id/afterConnectionLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/discoveryFoundListView">
+
+        <RelativeLayout
+            android:id="@+id/sendDataFieldLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/sendDataText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toLeftOf="@+id/selectFileButton"
+                android:layout_alignParentTop="true"
+                android:hint="@string/advertising_nickname_text_hint"
+            />
+
+            <Button
+                android:id="@+id/selectFileButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:text="ファイルを添付する"
+                />
+        </RelativeLayout>
+
+        <ListView
+            android:id="@+id/connectedListView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/sendDataFieldLayout" />
+    </RelativeLayout>
 
 </RelativeLayout>

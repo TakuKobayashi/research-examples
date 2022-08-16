@@ -1,12 +1,14 @@
 package net.taptappun.taku.kobayashi.nearbyconnectionsample
 
 import android.Manifest
-import android.content.DialogInterface
+import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
-import android.icu.text.DateTimePatternGenerator.PatternInfo.OK
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -20,6 +22,17 @@ class MainActivity : AppCompatActivity() {
     private lateinit var nearbyConnectionManager: NearbyConnectionManager
     private lateinit var binding: ActivityMainBinding
     private lateinit var foundListAdapter: FoundListAdapter
+    private lateinit var connectionListAdapter: ConnectionListAdapter
+    private var willSendFilePayload: Payload? = null
+
+    private val filePickStartActivityForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            result: ActivityResult ->
+        if (result.resultCode == Activity.RESULT_OK && result.data != null && result.data!!.data != null) {
+            val dataIntent = result.data
+            val pfd = contentResolver.openFileDescriptor(dataIntent!!.data!!, "r")
+            willSendFilePayload = Payload.fromFile(pfd!!)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,12 +71,34 @@ class MainActivity : AppCompatActivity() {
         foundListAdapter = FoundListAdapter(this)
         binding.discoveryFoundListView.adapter = foundListAdapter
 
+        connectionListAdapter = ConnectionListAdapter(this)
+        binding.connectedListView.adapter = connectionListAdapter
+
+        val sendDataText = binding.sendDataText
+
+        val selectFileButton = binding.selectFileButton
+        selectFileButton.setOnClickListener {
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+            intent.addCategory(Intent.CATEGORY_OPENABLE)
+            intent.type = "*/*"
+            filePickStartActivityForResult.launch(intent)
+        }
+
+        connectionListAdapter.setSendDataListener { endpoint: String, nickname: String ->
+            val sendPayload = if (willSendFilePayload != null) {
+                willSendFilePayload!!
+            } else {
+                Payload.fromBytes(sendDataText.text.toString().toByteArray())
+            }
+            nearbyConnectionManager.sendPayload(endpoint, sendPayload)
+        }
+
         foundListAdapter.setConnectionListener { endpoint: String, endpointInfo: DiscoveredEndpointInfo ->
             nearbyConnectionManager.requestConnection(nicknameEditText.text.toString(), endpoint)
         }
         nearbyConnectionManager.setConnectionCallback(object : NearbyConnectionManager.ConnectionCallback {
             override fun onDisconnected(endpointId: String) {
-                TODO("Not yet implemented")
+                connectionListAdapter.removeConnectionInfo(endpointId)
             }
 
             override fun onReceivedConnectionRequest(
@@ -79,6 +114,10 @@ class MainActivity : AppCompatActivity() {
                         nearbyConnectionManager.rejectConnection(endpointId)
                     }
                     .show()
+            }
+
+            override fun onConnectionSuccess(endpointId: String, nickname: String) {
+                connectionListAdapter.putConnectionInfo(endpointId, nickname)
             }
 
             override fun onEndpointFound(
@@ -119,7 +158,7 @@ class MainActivity : AppCompatActivity() {
 
     private val receivedPayloadCallback = object : PayloadCallback() {
         override fun onPayloadReceived(endpointId: String, payload: Payload) {
-            Log.d(TAG, "payloadReceived:${endpointId}")
+            Log.d(TAG, "payloadReceived:${endpointId} payload:${payload} type:${payload.type}")
             when (payload.type) {
                 Payload.Type.BYTES -> {
                     // バイト配列を受け取った時
