@@ -3,4 +3,5 @@
     <string name="advertising_start_button_text">Start Advertising</string>
     <string name="discovery_start_button_text">Start Discovery</string>
     <string name="advertising_nickname_text_hint">Please input your nickname witch searched from the advertising</string>
+    <string name="discovery_found_label_text">Found device list</string>
 </resources>

@@ -28,22 +28,32 @@ class MainActivity : AppCompatActivity() {
         val nicknameEditText = binding.advertisingNicknameText
         nicknameEditText.setText(UUID.randomUUID().toString())
         binding.advertisingStartButton.setOnClickListener {
-            nearbyConnectionManager.startNearbyAdvertising("receiverTest")
+            if (allPermissionsGranted()) {
+                nearbyConnectionManager.startNearbyAdvertising(nicknameEditText.text.toString())
+            } else {
+                // permission許可要求
+                ActivityCompat.requestPermissions(
+                    this,
+                    REQUIRED_PERMISSIONS,
+                    REQUEST_CODE_START_ADVERTISING_PERMISSIONS
+                )
+            }
         }
         binding.discoveryStartButton.setOnClickListener {
-            nearbyConnectionManager.startDiscovery()
+            if (allPermissionsGranted()) {
+                nearbyConnectionManager.startDiscovery()
+            } else {
+                // permission許可要求
+                ActivityCompat.requestPermissions(
+                    this,
+                    REQUIRED_PERMISSIONS,
+                    REQUEST_CODE_START_DISCOVERY_PERMISSIONS
+                )
+            }
         }
         nearbyConnectionManager = NearbyConnectionManager(this, receivedPayloadCallback)
 
-        if (allPermissionsGranted()) {
-        } else {
-            // permission許可要求
-            ActivityCompat.requestPermissions(
-                this,
-                REQUIRED_PERMISSIONS,
-                REQUEST_CODE_PERMISSIONS
-            )
-        }
+
     }
 
     override fun onRequestPermissionsResult(
@@ -53,14 +63,13 @@ class MainActivity : AppCompatActivity() {
         IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_CODE_PERMISSIONS) {
+        if (requestCode == REQUEST_CODE_START_ADVERTISING_PERMISSIONS) {
             if (allPermissionsGranted()) {
-            } else {
-                Toast.makeText(
-                    this,
-                    "Permissions not granted by the user.",
-                    Toast.LENGTH_SHORT
-                ).show()
+                nearbyConnectionManager.startNearbyAdvertising(binding.advertisingNicknameText.text.toString())
+            }
+        } else if (requestCode == REQUEST_CODE_START_DISCOVERY_PERMISSIONS) {
+            if (allPermissionsGranted()) {
+                nearbyConnectionManager.startDiscovery()
             }
         }
     }
@@ -109,7 +118,8 @@ class MainActivity : AppCompatActivity() {
             System.loadLibrary("nearbyconnectionsample")
         }
         const val TAG = "NearbyConnectionSample"
-        private const val REQUEST_CODE_PERMISSIONS = 10
+        private const val REQUEST_CODE_START_ADVERTISING_PERMISSIONS = 20
+        private const val REQUEST_CODE_START_DISCOVERY_PERMISSIONS = 30
         private val REQUIRED_PERMISSIONS =
             mutableListOf(
                 Manifest.permission.ACCESS_COARSE_LOCATION,
