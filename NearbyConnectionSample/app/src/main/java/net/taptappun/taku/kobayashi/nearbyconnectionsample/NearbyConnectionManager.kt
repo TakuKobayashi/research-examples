@@ -21,6 +21,7 @@ class NearbyConnectionManager(private val context: Context, payloadCallback: Pay
     private val foundEndpoints = mutableMapOf<String, DiscoveredEndpointInfo>()
     private val mayConnectingEndpointIdNicknames = mutableMapOf<String, String>()
     private val connectSuccessEndpointIds = mutableSetOf<String>()
+    private var connectionCallback: ConnectionCallback? = null
 
     // 探してもらえるようにする
     public fun startNearbyAdvertising(nickname: String) {
@@ -70,6 +71,10 @@ class NearbyConnectionManager(private val context: Context, payloadCallback: Pay
         nearbyConnectionClient.requestConnection(nickname, endpointId, connectionLifecycleCallback)
     }
 
+    fun setConnectionCallback(callback: ConnectionCallback){
+        connectionCallback = callback
+    }
+
     private val endpointDiscoveryCallback = object : EndpointDiscoveryCallback() {
         override fun onEndpointFound(endpointId: String, discoveredEndpointInfo: DiscoveredEndpointInfo) {
             // Advertise側を発見した
@@ -77,22 +82,25 @@ class NearbyConnectionManager(private val context: Context, payloadCallback: Pay
             Log.d(MainActivity.TAG, "found:${endpointId} endpointName:${discoveredEndpointInfo.endpointName} serviceId:${discoveredEndpointInfo.serviceId}")
             // Connectionを要求する処理
             foundEndpoints[endpointId] = discoveredEndpointInfo
-            requestConnection("senderTest", endpointId)
+            connectionCallback?.onEndpointFound(endpointId, discoveredEndpointInfo)
         }
 
         override fun onEndpointLost(endpointId: String) {
             // 見つけたエンドポイントを見失った
             foundEndpoints.remove(endpointId)
+            connectionCallback?.onEndpointLost(endpointId)
         }
     }
 
     private val connectionLifecycleCallback = object : ConnectionLifecycleCallback() {
         override fun onConnectionInitiated(endpointId: String, connectionInfo: ConnectionInfo) {
+            Log.d(MainActivity.TAG, "connectionResult:${endpointId} connectionInfo:${connectionInfo.authenticationDigits}")
             // 他の端末からコネクションのリクエストを受け取った時
             // とりあえず来る者は拒まず即承認
             // 承認した段階でコネクションが確立されたと仮定する
             mayConnectingEndpointIdNicknames[endpointId] = connectionInfo.endpointName
             connectSuccessEndpointIds.add(endpointId)
+            connectionCallback?.onReceivedConnectionRequest(endpointId, connectionInfo)
             nearbyConnectionClient.acceptConnection(endpointId, payloadCallback)
         }
 
@@ -130,7 +138,14 @@ class NearbyConnectionManager(private val context: Context, payloadCallback: Pay
             Log.d(MainActivity.TAG, "disconnect:${endpointId}")
             mayConnectingEndpointIdNicknames.remove(endpointId)
             connectSuccessEndpointIds.remove(endpointId)
+            connectionCallback?.onDisconnected(endpointId)
         }
+    }
 
+    interface ConnectionCallback {
+        fun onDisconnected(endpointId: String)
+        fun onReceivedConnectionRequest(endpointId: String, connectionInfo: ConnectionInfo)
+        fun onEndpointFound(endpointId: String, discoveredEndpointInfo: DiscoveredEndpointInfo)
+        fun onEndpointLost(endpointId: String)
     }
 }

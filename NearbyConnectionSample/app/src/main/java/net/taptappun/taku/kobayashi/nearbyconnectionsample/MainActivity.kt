@@ -1,23 +1,25 @@
 package net.taptappun.taku.kobayashi.nearbyconnectionsample
 
 import android.Manifest
+import android.content.DialogInterface
 import android.content.pm.PackageManager
+import android.icu.text.DateTimePatternGenerator.PatternInfo.OK
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.google.android.gms.nearby.connection.PayloadTransferUpdate
-import com.google.android.gms.nearby.connection.Payload
-import com.google.android.gms.nearby.connection.PayloadCallback
+import com.google.android.gms.nearby.connection.*
 import net.taptappun.taku.kobayashi.nearbyconnectionsample.databinding.ActivityMainBinding
-import java.util.UUID
+import java.util.*
+
 
 class MainActivity : AppCompatActivity() {
     private lateinit var nearbyConnectionManager: NearbyConnectionManager
     private lateinit var binding: ActivityMainBinding
+    private lateinit var foundListAdapter: FoundListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,7 +55,44 @@ class MainActivity : AppCompatActivity() {
         }
         nearbyConnectionManager = NearbyConnectionManager(this, receivedPayloadCallback)
 
+        foundListAdapter = FoundListAdapter(this)
+        binding.discoveryFoundListView.adapter = foundListAdapter
 
+        foundListAdapter.setConnectionListener { endpoint: String, endpointInfo: DiscoveredEndpointInfo ->
+            nearbyConnectionManager.requestConnection(nicknameEditText.text.toString(), endpoint)
+        }
+        nearbyConnectionManager.setConnectionCallback(object : NearbyConnectionManager.ConnectionCallback {
+            override fun onDisconnected(endpointId: String) {
+                TODO("Not yet implemented")
+            }
+
+            override fun onReceivedConnectionRequest(
+                endpointId: String,
+                connectionInfo: ConnectionInfo
+            ) {
+                AlertDialog.Builder(this@MainActivity)
+                    .setTitle("${connectionInfo.endpointName} から接続要求を受け取りました")
+                    .setMessage("接続しますか?")
+                    .setPositiveButton("接続する") { dialog, id ->
+
+                    }.setNegativeButton("拒否") { dialog, id ->
+
+                    }
+                    .show()
+            }
+
+            override fun onEndpointFound(
+                endpointId: String,
+                discoveredEndpointInfo: DiscoveredEndpointInfo
+            ) {
+                foundListAdapter.putFoundEndpoint(endpointId, discoveredEndpointInfo)
+            }
+
+            override fun onEndpointLost(endpointId: String) {
+                foundListAdapter.removeFoundEndpoint(endpointId)
+            }
+
+        })
     }
 
     override fun onRequestPermissionsResult(
