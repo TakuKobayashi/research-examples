@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">NearbyConnectionSample</string>
+    <string name="advertising_start_button_text">探してもらう</string>
+    <string name="discovery_start_button_text">探す</string>
+    <string name="advertising_nickname_text_hint">探してもらうときに表示する名前を入力してください</string>
+</resources>

@@ -4,7 +4,16 @@ import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import com.google.android.gms.nearby.Nearby
-import com.google.android.gms.nearby.connection.*
+import com.google.android.gms.nearby.connection.AdvertisingOptions
+import com.google.android.gms.nearby.connection.DiscoveryOptions
+import com.google.android.gms.nearby.connection.Strategy
+import com.google.android.gms.nearby.connection.EndpointDiscoveryCallback
+import com.google.android.gms.nearby.connection.DiscoveredEndpointInfo
+import com.google.android.gms.nearby.connection.ConnectionLifecycleCallback
+import com.google.android.gms.nearby.connection.ConnectionsStatusCodes
+import com.google.android.gms.nearby.connection.PayloadCallback
+import com.google.android.gms.nearby.connection.ConnectionInfo
+import com.google.android.gms.nearby.connection.ConnectionResolution
 
 class NearbyConnectionManager(private val context: Context, payloadCallback: PayloadCallback) {
 
