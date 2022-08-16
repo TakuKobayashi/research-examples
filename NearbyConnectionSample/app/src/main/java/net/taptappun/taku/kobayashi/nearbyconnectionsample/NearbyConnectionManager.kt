@@ -15,7 +15,10 @@ import com.google.android.gms.nearby.connection.PayloadCallback
 import com.google.android.gms.nearby.connection.ConnectionInfo
 import com.google.android.gms.nearby.connection.ConnectionResolution
 
-class NearbyConnectionManager(private val context: Context, payloadCallback: PayloadCallback) {
+class NearbyConnectionManager(
+    private val context: Context,
+    private val payloadCallback: PayloadCallback
+) {
 
     private val nearbyConnectionClient = Nearby.getConnectionsClient(context.applicationContext)
     private val foundEndpoints = mutableMapOf<String, DiscoveredEndpointInfo>()
@@ -65,10 +68,25 @@ class NearbyConnectionManager(private val context: Context, payloadCallback: Pay
             }
     }
 
+    private var requestEndpointId: String? = null
+
     public fun requestConnection(nickname: String, endpointId: String){
+        Log.d(MainActivity.TAG, "requestConnection:${endpointId} requestNickname:${nickname}")
+        requestEndpointId = endpointId
         // コネクションをリクエストした段階で成功することを前提に一旦情報を保持する(ダメだった時には消す)
         mayConnectingEndpointIdNicknames[endpointId] = nickname
         nearbyConnectionClient.requestConnection(nickname, endpointId, connectionLifecycleCallback)
+    }
+
+    fun acceptConnection(endpointId: String){
+        connectSuccessEndpointIds.add(endpointId)
+        nearbyConnectionClient.acceptConnection(endpointId, payloadCallback)
+    }
+
+    fun rejectConnection(endpointId: String){
+        mayConnectingEndpointIdNicknames.remove(endpointId)
+        connectSuccessEndpointIds.remove(endpointId)
+        nearbyConnectionClient.rejectConnection(endpointId)
     }
 
     fun setConnectionCallback(callback: ConnectionCallback){
@@ -94,18 +112,21 @@ class NearbyConnectionManager(private val context: Context, payloadCallback: Pay
 
     private val connectionLifecycleCallback = object : ConnectionLifecycleCallback() {
         override fun onConnectionInitiated(endpointId: String, connectionInfo: ConnectionInfo) {
-            Log.d(MainActivity.TAG, "connectionResult:${endpointId} connectionInfo:${connectionInfo.authenticationDigits}")
+            Log.d(MainActivity.TAG, "connectionResult:${endpointId} connectionInfo:${connectionInfo.endpointName} isIncomingConnection:${connectionInfo.isIncomingConnection}")
             // 他の端末からコネクションのリクエストを受け取った時
             // とりあえず来る者は拒まず即承認
             // 承認した段階でコネクションが確立されたと仮定する
             mayConnectingEndpointIdNicknames[endpointId] = connectionInfo.endpointName
-            connectSuccessEndpointIds.add(endpointId)
-            connectionCallback?.onReceivedConnectionRequest(endpointId, connectionInfo)
-            nearbyConnectionClient.acceptConnection(endpointId, payloadCallback)
+            // isIncomingConnection: requestを受け取った場合はtrue、送った場合はfalse
+            if(connectionInfo.isIncomingConnection){
+                connectionCallback?.onReceivedConnectionRequest(endpointId, connectionInfo)
+            }
+            //connectSuccessEndpointIds.add(endpointId)
+            //nearbyConnectionClient.acceptConnection(endpointId, payloadCallback)
         }
 
         override fun onConnectionResult(endpointId: String, result: ConnectionResolution) {
-            Log.d(MainActivity.TAG, "connectionResult:${endpointId} statusMessage:${result.status.statusMessage}")
+            Log.d(MainActivity.TAG, "connectionResult:${endpointId} code:${result.status.statusCode} statusMessage:${result.status.statusMessage}")
             // コネクションリクエストの結果を受け取った時
 
             when (result.status.statusCode) {

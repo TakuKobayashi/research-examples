@@ -74,9 +74,9 @@ class MainActivity : AppCompatActivity() {
                     .setTitle("${connectionInfo.endpointName} から接続要求を受け取りました")
                     .setMessage("接続しますか?")
                     .setPositiveButton("接続する") { dialog, id ->
-
+                        nearbyConnectionManager.acceptConnection(endpointId)
                     }.setNegativeButton("拒否") { dialog, id ->
-
+                        nearbyConnectionManager.rejectConnection(endpointId)
                     }
                     .show()
             }
