@@ -77,11 +77,14 @@ class ConnectionListAdapter(private val activity: Activity) : BaseAdapter() {
         val endpointTextview = mainConvertView.findViewById<TextView>(R.id.connectedEndpointTextview)
         endpointTextview.text = connectionId
         val connectionButton = mainConvertView.findViewById<Button>(R.id.sendDataButton)
+        connectionButton.visibility = View.VISIBLE
         connectionButton.setOnClickListener {
             if (nickname != null) {
                 sendDataListener?.let { it -> it(connectionId, nickname) }
             }
         }
+        val sendingProgressBar = mainConvertView.findViewById<ProgressBar>(R.id.sendingProgressBar)
+        sendingProgressBar.visibility = View.INVISIBLE
         return mainConvertView
     }
 }

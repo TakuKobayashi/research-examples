@@ -62,7 +62,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_toLeftOf="@+id/selectFileButton"
-                android:layout_alignParentTop="true"
+                android:layout_centerVertical="true"
             />
 
             <Button
