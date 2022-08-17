@@ -140,6 +140,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onConnectionSuccess(endpointId: String, nickname: String) {
+                foundListAdapter.removeFoundEndpoint(endpointId)
                 connectionListAdapter.putConnectionInfo(endpointId, nickname)
             }
 
