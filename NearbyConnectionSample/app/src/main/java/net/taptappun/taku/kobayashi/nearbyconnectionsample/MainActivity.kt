@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.provider.Settings
 import android.util.Log
 import android.view.View
 import androidx.activity.result.ActivityResult
@@ -61,7 +62,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val nicknameEditText = binding.advertisingNicknameText
-        nicknameEditText.setText(UUID.randomUUID().toString())
+        nicknameEditText.setText(Settings.Global.getString(contentResolver, Settings.Global.DEVICE_NAME))
         binding.advertisingStartButton.setOnClickListener {
             if (allPermissionsGranted()) {
                 nearbyConnectionManager.startNearbyAdvertising(nicknameEditText.text.toString())
