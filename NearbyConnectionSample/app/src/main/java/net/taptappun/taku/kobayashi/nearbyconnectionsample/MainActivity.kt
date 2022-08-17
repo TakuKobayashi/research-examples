@@ -4,8 +4,10 @@ import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.webkit.URLUtil
 import androidx.activity.result.ActivityResult
@@ -19,6 +21,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.android.gms.nearby.connection.*
 import net.taptappun.taku.kobayashi.nearbyconnectionsample.databinding.ActivityMainBinding
 import org.msgpack.jackson.dataformat.MessagePackMapper
+import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.util.*
 
 
@@ -28,17 +32,40 @@ class MainActivity : AppCompatActivity() {
     private lateinit var foundListAdapter: FoundListAdapter
     private lateinit var connectionListAdapter: ConnectionListAdapter
     private var willSendBytesMaps = mutableMapOf<String, Any>()
+    private var willEndpointId: String? = null
+    private var willSaveFileUri: Uri? = null
 
     private val filePickStartActivityForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             result: ActivityResult ->
         if (result.resultCode == Activity.RESULT_OK && result.data != null && result.data!!.data != null) {
             val dataIntent = result.data
+            val projection = arrayOf(MediaStore.MediaColumns.DISPLAY_NAME)
+            val cursor = contentResolver.query(dataIntent!!.data!!, projection, null, null, null)
+            if (cursor != null) {
+                if (cursor.moveToFirst()) {
+                    willSendBytesMaps["fileName"] = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME))
+                }
+                cursor.close()
+            }
             Log.d(TAG, "${dataIntent!!.data!!}")
-            val sendFileName = URLUtil.guessFileName(dataIntent?.data?.toString(), null, null)
-            Log.d(TAG, sendFileName)
-            willSendBytesMaps["fileName"] = sendFileName
             willSendBytesMaps["fileUri"] = dataIntent.data.toString()
             willSendBytesMaps["action"] = "requestSendFile"
+        }
+    }
+
+    private val fileSaveStartActivityForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            result: ActivityResult ->
+        if (result.resultCode == Activity.RESULT_OK && result.data != null && result.data!!.data != null) {
+            val willSaveFileIntent = result.data
+            willSaveFileUri = willSaveFileIntent!!.data
+            val map = mutableMapOf<String, Any>()
+            map["action"] = "responseSendFile"
+            map["message"] = "OK"
+            val objectMapper: ObjectMapper = MessagePackMapper()
+            val payloadResponseSendFile = Payload.fromBytes(objectMapper.writeValueAsBytes(map))
+            nearbyConnectionManager.sendPayload(willEndpointId.toString(), payloadResponseSendFile)
+            willEndpointId = null
+
         }
     }
 
@@ -178,27 +205,30 @@ class MainActivity : AppCompatActivity() {
                         Log.d(TAG, "key:${key} value:${value}")
                     }
                     if(deserialized["action"] == "requestSendFile"){
-                        val map = mutableMapOf<String, Any>()
-                        map["action"] = "responseSendFile"
-                        map["message"] = "OK"
-                        map["fileUri"] = deserialized["fileUri"].toString()
-                        val objectMapper: ObjectMapper = MessagePackMapper()
-                        val payloadResponseSendFile = Payload.fromBytes(objectMapper.writeValueAsBytes(map))
-                        nearbyConnectionManager.sendPayload(endpointId, payloadResponseSendFile)
-                    }else if(deserialized["action"] == "responseSendFile"){
-
+                        willEndpointId = endpointId
+                        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
+                        intent.addCategory(Intent.CATEGORY_OPENABLE)
+                        intent.type = "*/*"
+                        intent.putExtra(Intent.EXTRA_TITLE, deserialized["fileName"].toString())
+                        fileSaveStartActivityForResult.launch(intent)
+                    } else if(deserialized["action"] == "responseSendFile") {
+                        val pfd = contentResolver.openFileDescriptor(Uri.parse(willSendBytesMaps["fileUri"].toString()), "r")
+                        val payload = Payload.fromFile(pfd!!)
+                        nearbyConnectionManager.sendPayload(endpointId, payload)
                     }
                     // 処理
                 }
                 Payload.Type.FILE -> {
                     // ファイルを受け取った時
-                    //val payloadFile = payload.asFile()!!
-                    //val payloadFileUri = payloadFile.asUri()
-                    //Log.d(TAG, "payloadFileUri:${payloadFileUri.toString()}")
-                    //val inputStream = contentResolver.openInputStream(payloadFileUri!!)
-
-
-                    // 処理
+                    val payloadFile = payload.asFile()!!
+                    val payloadFileUri = payloadFile.asUri()
+                    Log.d(TAG, "payloadFileUri:${payloadFileUri.toString()}")
+                    val fileInputStream = contentResolver.openInputStream(payloadFileUri!!)
+                    val outputStream = contentResolver.openOutputStream(willSaveFileUri!!)
+                    fileInputStream?.copyTo(outputStream!!)
+                    //ファイルに書き込む
+                    outputStream?.flush()
+                    outputStream?.close()
                 }
                 Payload.Type.STREAM -> {
                     // ストリームを受け取った時
@@ -210,7 +240,7 @@ class MainActivity : AppCompatActivity() {
 
         override fun onPayloadTransferUpdate(endpointId: String, update: PayloadTransferUpdate) {
             // 転送状態が更新された時詳細は省略
-            Log.d(TAG, "payloadUpdate:${endpointId}")
+            Log.d(TAG, "payloadUpdate:${endpointId} payloadId:${update.payloadId} status:${update.status} bytesTransferred:${update.bytesTransferred} totalBytes:${update.totalBytes}")
         }
     }
 
