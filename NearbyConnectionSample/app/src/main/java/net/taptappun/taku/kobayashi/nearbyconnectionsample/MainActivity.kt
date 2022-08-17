@@ -15,14 +15,15 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.net.toFile
-import androidx.documentfile.provider.DocumentFile
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.google.android.gms.nearby.connection.*
+import com.google.android.gms.nearby.connection.ConnectionInfo
+import com.google.android.gms.nearby.connection.DiscoveredEndpointInfo
+import com.google.android.gms.nearby.connection.Payload
+import com.google.android.gms.nearby.connection.PayloadCallback
+import com.google.android.gms.nearby.connection.PayloadTransferUpdate
 import net.taptappun.taku.kobayashi.nearbyconnectionsample.databinding.ActivityMainBinding
 import org.msgpack.jackson.dataformat.MessagePackMapper
-import java.io.File
 import java.util.UUID
 
 class MainActivity : AppCompatActivity() {

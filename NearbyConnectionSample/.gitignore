@@ -9,6 +9,7 @@
 .idea/misc.xml
 .idea/gradle.xml
 .idea/deploymentTargetDropDown.xml
+.idea/compiler.xml
 .DS_Store
 build/
 captures/
