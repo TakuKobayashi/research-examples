@@ -80,13 +80,11 @@ class NearbyConnectionManager(
     }
 
     fun acceptConnection(endpointId: String){
-        Log.d(MainActivity.TAG, "accept:${endpointId}")
         connectSuccessEndpointIds.add(endpointId)
         nearbyConnectionClient.acceptConnection(endpointId, payloadCallback)
     }
 
     fun rejectConnection(endpointId: String){
-        Log.d(MainActivity.TAG, "reject:${endpointId}")
         mayConnectingEndpointIdNicknames.remove(endpointId)
         connectSuccessEndpointIds.remove(endpointId)
         nearbyConnectionClient.rejectConnection(endpointId)

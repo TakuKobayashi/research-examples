@@ -7,14 +7,18 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.webkit.URLUtil
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.android.gms.nearby.connection.*
 import net.taptappun.taku.kobayashi.nearbyconnectionsample.databinding.ActivityMainBinding
+import org.msgpack.jackson.dataformat.MessagePackMapper
 import java.util.*
 
 
@@ -23,14 +27,18 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var foundListAdapter: FoundListAdapter
     private lateinit var connectionListAdapter: ConnectionListAdapter
-    private var willSendFilePayload: Payload? = null
+    private var willSendBytesMaps = mutableMapOf<String, Any>()
 
     private val filePickStartActivityForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             result: ActivityResult ->
         if (result.resultCode == Activity.RESULT_OK && result.data != null && result.data!!.data != null) {
             val dataIntent = result.data
-            val pfd = contentResolver.openFileDescriptor(dataIntent!!.data!!, "r")
-            willSendFilePayload = Payload.fromFile(pfd!!)
+            Log.d(TAG, "${dataIntent!!.data!!}")
+            val sendFileName = URLUtil.guessFileName(dataIntent?.data?.toString(), null, null)
+            Log.d(TAG, sendFileName)
+            willSendBytesMaps["fileName"] = sendFileName
+            willSendBytesMaps["fileUri"] = dataIntent.data.toString()
+            willSendBytesMaps["action"] = "requestSendFile"
         }
     }
 
@@ -74,8 +82,6 @@ class MainActivity : AppCompatActivity() {
         connectionListAdapter = ConnectionListAdapter(this)
         binding.connectedListView.adapter = connectionListAdapter
 
-        val sendDataText = binding.sendDataText
-
         val selectFileButton = binding.selectFileButton
         selectFileButton.setOnClickListener {
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
@@ -85,12 +91,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         connectionListAdapter.setSendDataListener { endpoint: String, nickname: String ->
-            val sendPayload = if (willSendFilePayload != null) {
-                willSendFilePayload!!
-            } else {
-                Payload.fromBytes(sendDataText.text.toString().toByteArray())
+            if (willSendBytesMaps.isNotEmpty()) {
+                val objectMapper: ObjectMapper = MessagePackMapper()
+                val payloadRequestSendFile = Payload.fromBytes(objectMapper.writeValueAsBytes(willSendBytesMaps))
+                nearbyConnectionManager.sendPayload(endpoint, payloadRequestSendFile)
             }
-            nearbyConnectionManager.sendPayload(endpoint, sendPayload)
+
         }
 
         foundListAdapter.setConnectionListener { endpoint: String, endpointInfo: DiscoveredEndpointInfo ->
@@ -158,16 +164,40 @@ class MainActivity : AppCompatActivity() {
 
     private val receivedPayloadCallback = object : PayloadCallback() {
         override fun onPayloadReceived(endpointId: String, payload: Payload) {
-            Log.d(TAG, "payloadReceived:${endpointId} payload:${payload} type:${payload.type}")
+            Log.d(TAG, "payloadReceived:${endpointId} payloadId:${payload.id} type:${payload.type}")
             when (payload.type) {
                 Payload.Type.BYTES -> {
                     // バイト配列を受け取った時
-                    val data = payload.asBytes()!!
+                    val bytes = payload.asBytes()!!
+                    val objectMapper: ObjectMapper = MessagePackMapper()
+                    val deserialized: Map<String, Any> = objectMapper.readValue(
+                        bytes,
+                        object : TypeReference<Map<String, Any>>() {}
+                    )
+                    for((key, value) in deserialized){
+                        Log.d(TAG, "key:${key} value:${value}")
+                    }
+                    if(deserialized["action"] == "requestSendFile"){
+                        val map = mutableMapOf<String, Any>()
+                        map["action"] = "responseSendFile"
+                        map["message"] = "OK"
+                        map["fileUri"] = deserialized["fileUri"].toString()
+                        val objectMapper: ObjectMapper = MessagePackMapper()
+                        val payloadResponseSendFile = Payload.fromBytes(objectMapper.writeValueAsBytes(map))
+                        nearbyConnectionManager.sendPayload(endpointId, payloadResponseSendFile)
+                    }else if(deserialized["action"] == "responseSendFile"){
+
+                    }
                     // 処理
                 }
                 Payload.Type.FILE -> {
                     // ファイルを受け取った時
-                    val file = payload.asFile()!!
+                    //val payloadFile = payload.asFile()!!
+                    //val payloadFileUri = payloadFile.asUri()
+                    //Log.d(TAG, "payloadFileUri:${payloadFileUri.toString()}")
+                    //val inputStream = contentResolver.openInputStream(payloadFileUri!!)
+
+
                     // 処理
                 }
                 Payload.Type.STREAM -> {
