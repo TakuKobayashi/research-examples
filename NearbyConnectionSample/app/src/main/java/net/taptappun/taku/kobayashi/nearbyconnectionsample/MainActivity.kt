@@ -9,22 +9,21 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
-import android.webkit.URLUtil
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.net.toFile
+import androidx.documentfile.provider.DocumentFile
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.android.gms.nearby.connection.*
 import net.taptappun.taku.kobayashi.nearbyconnectionsample.databinding.ActivityMainBinding
 import org.msgpack.jackson.dataformat.MessagePackMapper
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.util.*
-
+import java.io.File
+import java.util.UUID
 
 class MainActivity : AppCompatActivity() {
     private lateinit var nearbyConnectionManager: NearbyConnectionManager
@@ -32,8 +31,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var foundListAdapter: FoundListAdapter
     private lateinit var connectionListAdapter: ConnectionListAdapter
     private var willSendBytesMaps = mutableMapOf<String, Any>()
-    private var willEndpointId: String? = null
-    private var willSaveFileUri: Uri? = null
 
     private val filePickStartActivityForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             result: ActivityResult ->
@@ -50,22 +47,6 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "${dataIntent!!.data!!}")
             willSendBytesMaps["fileUri"] = dataIntent.data.toString()
             willSendBytesMaps["action"] = "requestSendFile"
-        }
-    }
-
-    private val fileSaveStartActivityForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            result: ActivityResult ->
-        if (result.resultCode == Activity.RESULT_OK && result.data != null && result.data!!.data != null) {
-            val willSaveFileIntent = result.data
-            willSaveFileUri = willSaveFileIntent!!.data
-            val map = mutableMapOf<String, Any>()
-            map["action"] = "responseSendFile"
-            map["message"] = "OK"
-            val objectMapper: ObjectMapper = MessagePackMapper()
-            val payloadResponseSendFile = Payload.fromBytes(objectMapper.writeValueAsBytes(map))
-            nearbyConnectionManager.sendPayload(willEndpointId.toString(), payloadResponseSendFile)
-            willEndpointId = null
-
         }
     }
 
@@ -119,8 +100,12 @@ class MainActivity : AppCompatActivity() {
 
         connectionListAdapter.setSendDataListener { endpoint: String, nickname: String ->
             if (willSendBytesMaps.isNotEmpty()) {
-                val objectMapper: ObjectMapper = MessagePackMapper()
-                val payloadRequestSendFile = Payload.fromBytes(objectMapper.writeValueAsBytes(willSendBytesMaps))
+                // Fileを送る前にmessagePackを送り付けて聞く場合の方法
+                //val objectMapper: ObjectMapper = MessagePackMapper()
+                //val payloadRequestSendFile = Payload.fromBytes(objectMapper.writeValueAsBytes(willSendBytesMaps))
+                val pfd = contentResolver.openFileDescriptor(Uri.parse(willSendBytesMaps["fileUri"].toString()), "r")
+                val payloadRequestSendFile = Payload.fromFile(pfd!!)
+                payloadRequestSendFile.setFileName(willSendBytesMaps["fileName"].toString())
                 nearbyConnectionManager.sendPayload(endpoint, payloadRequestSendFile)
             }
 
@@ -205,12 +190,12 @@ class MainActivity : AppCompatActivity() {
                         Log.d(TAG, "key:${key} value:${value}")
                     }
                     if(deserialized["action"] == "requestSendFile"){
-                        willEndpointId = endpointId
-                        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
-                        intent.addCategory(Intent.CATEGORY_OPENABLE)
-                        intent.type = "*/*"
-                        intent.putExtra(Intent.EXTRA_TITLE, deserialized["fileName"].toString())
-                        fileSaveStartActivityForResult.launch(intent)
+                        val map = mutableMapOf<String, Any>()
+                        map["action"] = "responseSendFile"
+                        map["message"] = "OK"
+                        val objectMapper: ObjectMapper = MessagePackMapper()
+                        val payloadResponseSendFile = Payload.fromBytes(objectMapper.writeValueAsBytes(map))
+                        nearbyConnectionManager.sendPayload(endpointId, payloadResponseSendFile)
                     } else if(deserialized["action"] == "responseSendFile") {
                         val pfd = contentResolver.openFileDescriptor(Uri.parse(willSendBytesMaps["fileUri"].toString()), "r")
                         val payload = Payload.fromFile(pfd!!)
@@ -220,15 +205,10 @@ class MainActivity : AppCompatActivity() {
                 }
                 Payload.Type.FILE -> {
                     // ファイルを受け取った時
+                    // このメソッドを実行してUriを取得しているときにはもう既にファイルが出来上がっている file名payload.idの値
                     val payloadFile = payload.asFile()!!
                     val payloadFileUri = payloadFile.asUri()
-                    Log.d(TAG, "payloadFileUri:${payloadFileUri.toString()}")
-                    val fileInputStream = contentResolver.openInputStream(payloadFileUri!!)
-                    val outputStream = contentResolver.openOutputStream(willSaveFileUri!!)
-                    fileInputStream?.copyTo(outputStream!!)
-                    //ファイルに書き込む
-                    outputStream?.flush()
-                    outputStream?.close()
+                    Log.d(TAG, "payloadFileUri:${payloadFileUri.toString()} path:${payloadFileUri!!.path}")
                 }
                 Payload.Type.STREAM -> {
                     // ストリームを受け取った時
@@ -238,6 +218,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        // データを送受信されるたびに呼ばれる
+        // ファイル転送などは途中の経過して呼ばれる
         override fun onPayloadTransferUpdate(endpointId: String, update: PayloadTransferUpdate) {
             // 転送状態が更新された時詳細は省略
             Log.d(TAG, "payloadUpdate:${endpointId} payloadId:${update.payloadId} status:${update.status} bytesTransferred:${update.bytesTransferred} totalBytes:${update.totalBytes}")
