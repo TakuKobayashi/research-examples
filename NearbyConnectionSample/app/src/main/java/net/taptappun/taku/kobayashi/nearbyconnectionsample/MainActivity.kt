@@ -41,7 +41,9 @@ class MainActivity : AppCompatActivity() {
             val cursor = contentResolver.query(dataIntent!!.data!!, projection, null, null, null)
             if (cursor != null) {
                 if (cursor.moveToFirst()) {
-                    willSendBytesMaps["fileName"] = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME))
+                    val fileName = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME))
+                    binding.sendDataText.text = fileName
+                    willSendBytesMaps["fileName"] = fileName
                 }
                 cursor.close()
             }
