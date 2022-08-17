@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
+import android.view.View
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -110,8 +111,8 @@ class MainActivity : AppCompatActivity() {
                 val payloadRequestSendFile = Payload.fromFile(pfd!!)
                 payloadRequestSendFile.setFileName(willSendBytesMaps["fileName"].toString())
                 nearbyConnectionManager.sendPayload(endpoint, payloadRequestSendFile)
+                connectionListAdapter.setSendingProgress(endpoint, PayloadTransferUpdate.Status.IN_PROGRESS, 0, 100)
             }
-
         }
 
         foundListAdapter.setConnectionListener { endpoint: String, endpointInfo: DiscoveredEndpointInfo ->
@@ -226,6 +227,7 @@ class MainActivity : AppCompatActivity() {
         override fun onPayloadTransferUpdate(endpointId: String, update: PayloadTransferUpdate) {
             // 転送状態が更新された時詳細は省略
             Log.d(TAG, "payloadUpdate:${endpointId} payloadId:${update.payloadId} status:${update.status} bytesTransferred:${update.bytesTransferred} totalBytes:${update.totalBytes}")
+            connectionListAdapter.setSendingProgress(endpointId, update.status, update.bytesTransferred.toInt(), update.totalBytes.toInt())
         }
     }
 
