@@ -10,7 +10,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
-import android.view.View
+import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -26,7 +26,6 @@ import com.google.android.gms.nearby.connection.PayloadCallback
 import com.google.android.gms.nearby.connection.PayloadTransferUpdate
 import net.taptappun.taku.kobayashi.nearbyconnectionsample.databinding.ActivityMainBinding
 import org.msgpack.jackson.dataformat.MessagePackMapper
-import java.util.UUID
 
 class MainActivity : AppCompatActivity() {
     private lateinit var nearbyConnectionManager: NearbyConnectionManager
@@ -112,7 +111,7 @@ class MainActivity : AppCompatActivity() {
                 val payloadRequestSendFile = Payload.fromFile(pfd!!)
                 payloadRequestSendFile.setFileName(willSendBytesMaps["fileName"].toString())
                 nearbyConnectionManager.sendPayload(endpoint, payloadRequestSendFile)
-                connectionListAdapter.setSendingProgress(endpoint, PayloadTransferUpdate.Status.IN_PROGRESS, 0, 100)
+                connectionListAdapter.setSendingProgress(endpoint, PayloadTransferUpdate.Status.IN_PROGRESS, 0, pfd.statSize.toInt())
             }
         }
 
@@ -230,6 +229,13 @@ class MainActivity : AppCompatActivity() {
             // 転送状態が更新された時詳細は省略
             Log.d(TAG, "payloadUpdate:${endpointId} payloadId:${update.payloadId} status:${update.status} bytesTransferred:${update.bytesTransferred} totalBytes:${update.totalBytes}")
             connectionListAdapter.setSendingProgress(endpointId, update.status, update.bytesTransferred.toInt(), update.totalBytes.toInt())
+            if(update.status == PayloadTransferUpdate.Status.SUCCESS){
+                Toast.makeText(applicationContext, "ファイルの送信が完了しました", Toast.LENGTH_LONG).show()
+            }else if(update.status == PayloadTransferUpdate.Status.CANCELED){
+                Toast.makeText(applicationContext, "ファイルの送信がキャンセルされました", Toast.LENGTH_LONG).show()
+            }else if(update.status == PayloadTransferUpdate.Status.FAILURE){
+                Toast.makeText(applicationContext, "ファイルの送信中にエラーがありました", Toast.LENGTH_LONG).show()
+            }
         }
     }
 
