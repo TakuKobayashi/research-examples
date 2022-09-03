@@ -38,4 +38,20 @@ function generateGoogleOauth2Client(req): OAuth2Client {
   return oauth2Client;
 }
 
+app.get('/google/photos', async (req, reply) => {
+  const photos = await loadPhotos(req.query.access_token);
+  return photos;
+});
+
+async function loadPhotos(accessToken: string){
+  const photos = new Photos(accessToken);
+
+  // pageSizeはMax 100件
+  // 詳しくはこちら: https://developers.google.com/photos/library/reference/rest/v1/mediaItems/list
+  // photos.transportでhttps://photoslibrary.googleapis.com/のエンドポイントにリクエストを投げるという意味、引数はエンドポイントにくっつける文字列
+  const photosResponse = await photos.transport.get("v1/mediaItems", {pageSize: 100})
+
+  return photosResponse.mediaItems;
+}
+
 export const handler = awsLambdaFastify(app);
