@@ -1,0 +1,26 @@
+{
+  "name": "github-api-file-upload",
+  "version": "1.0.0",
+  "description": "test file upload from github api",
+  "main": "serverless.ts",
+  "scripts": {
+    "format": "prettier --config .prettierrc --write \"**/*.ts\"",
+    "ts-node": "ts-node"
+  },
+  "engines": {
+    "node": ">=14.15.0"
+  },
+  "author": "TakuKobayashi",
+  "license": "MIT",
+  "dependencies": {
+    "octokit": "^2.0.14"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.10",
+    "dotenv": "^16.0.3",
+    "prettier": "^2.7.1",
+    "ts-node": "^10.9.1",
+    "tsconfig-paths": "^4.1.0",
+    "typescript": "^4.8.4"
+  }
+}
