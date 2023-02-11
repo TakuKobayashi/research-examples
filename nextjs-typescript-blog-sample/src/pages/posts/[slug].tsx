@@ -25,7 +25,7 @@ export async function getStaticPaths() {
 
 const Post = ({ frontMatter, content }) => {
   return (
-    <div>
+    <div className="prose">
       <h1>{frontMatter.title}</h1>
       <div dangerouslySetInnerHTML={{ __html: marked(content) }}></div>
     </div>
