@@ -4,7 +4,7 @@ import { config } from 'dotenv';
 const configedEnv = config();
 
 const serverlessConfiguration: AWS = {
-  service: 'threejs-mmd-parser-sample',
+  service: 'mmd-parser-sample',
   frameworkVersion: '3',
   plugins: ['serverless-esbuild', 'serverless-offline', 'serverless-dotenv-plugin'],
   provider: {

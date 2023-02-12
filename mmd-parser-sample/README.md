@@ -1,5 +1,5 @@
 
-# threejs-mmd-parser-sample
+# mmd-parser-sample
 
 MMD関連ファイルをサーバやCLIにて読み込みができるかどうか確かめてみるプロジェクト
 
