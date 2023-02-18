@@ -1,7 +1,7 @@
 import awsLambdaFastify from '@fastify/aws-lambda';
 import fastify from 'fastify';
-import { notionApiRead } from "./routers/notion/read"
-import { notionApiPost } from "./routers/notion/post"
+import { notionApiRead } from './routers/notion/read';
+import { notionApiPost } from './routers/notion/post';
 
 const app = fastify();
 
