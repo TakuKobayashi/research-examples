@@ -51,4 +51,5 @@ async () => {
 
 ## 参考
 
+* [Notion API Referernce](https://developers.notion.com/reference)
 * [Notion API利用のためのトークン取得・初期設定方法](https://programming-zero.net/notion-api-setting/)
