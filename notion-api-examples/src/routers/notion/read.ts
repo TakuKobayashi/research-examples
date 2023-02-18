@@ -24,6 +24,19 @@ export async function notionApiRead(app, opts): Promise<void> {
     return response;
   });
 
+  app.get('/page', async (req, res) => {
+    const response = await notion.pages.retrieve({ page_id: req.query.page_id });
+    return response;
+  });
+
+  app.get('/blocks', async (req, res) => {
+    const response = await notion.blocks.children.list({
+      block_id: req.query.page_id,
+      page_size: 100,
+    });
+    return response;
+  });
+
   app.get('/databases', async (req, res) => {
     const response = await notion.search({
       filter: {
