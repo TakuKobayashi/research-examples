@@ -28,7 +28,7 @@ export async function notionApiPost(app, opts): Promise<void> {
     return response;
   });
 
-  app.get('/add_sample_database', async (req, res) => {
+  app.get('/create_sample_database', async (req, res) => {
     const response = await notion.databases.create({
       parent: {
         type: 'page_id',
@@ -37,6 +37,67 @@ export async function notionApiPost(app, opts): Promise<void> {
       properties: {
         text: {
           title: {},
+        },
+        richtext: {
+          rich_text: {},
+        },
+        checkbox: {
+          checkbox: {},
+        },
+        selectbox: {
+          select: {
+            options: [
+              {
+                name: '🥦Vegetable',
+                color: 'green',
+              },
+              {
+                name: '🍎Fruit',
+                color: 'red',
+              },
+              {
+                name: '💪Protein',
+                color: 'yellow',
+              },
+            ],
+          },
+        },
+        price: {
+          number: {
+            format: 'yen',
+          },
+        },
+        date: {
+          date: {},
+        },
+        multi_selectbox: {
+          type: 'multi_select',
+          multi_select: {
+            options: [
+              {
+                name: 'Duc Loi Market',
+                color: 'blue',
+              },
+              {
+                name: 'Rainbow Grocery',
+                color: 'gray',
+              },
+              {
+                name: 'Nijiya Market',
+                color: 'purple',
+              },
+              {
+                name: "Gus'''s Community Market",
+                color: 'yellow',
+              },
+            ],
+          },
+        },
+        person: {
+          people: {},
+        },
+        file: {
+          files: {},
         },
       },
     });
