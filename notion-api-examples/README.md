@@ -123,9 +123,42 @@ const response = await notion.pages.create({
 ここでは 列名が `text` の項目に `hogehoge` という文字列のデータを追加しています。
 その他データの更新、削除は [Notion APIでデータベースを操作する](https://qiita.com/thomi40/items/fe2a828746f31ad827ba) を参考にして、同様に実施することができます。
 
+## その他情報の取得について
+
+### databaseの情報を取得したい
+
+以下のように `notion.search` を実行するときに `filter` で `value: 'database'` 、 `property: 'object'` 都することでdatabaseの情報とその中に入っている情報を取得することができます
+
+```typescript
+const response = await notion.search({
+  filter: {
+    value: 'database',
+    property: 'object'
+  },
+});
+return response;
+```
+
+取得したdatabaseの情報を基に各種更新や削除をかけるようにAPIを実行するとよさそう。
+
+### Page内にあるBlockの情報を取得したい
+
+Page内にあるBlockの情報を取得する場合は `notion.blocks.children.list` を以下のように実行すると取得できます。
+
+```typescript
+const response = await notion.blocks.children.list({
+  block_id: 'page_id',
+  page_size: 100,
+});
+return response;
+```
+
+ドキュメントなどでは `block_id` を指定するように書かれているが、実態は`page_id` を指定するとBlockの情報を取得できる。
+一回でとれるBlockの数はMAXで100件まで、件数は `page_size` にて指定できる。
 
 ## 参考
 
 * [Notion API Referernce](https://developers.notion.com/reference)
 * [Notion API利用のためのトークン取得・初期設定方法](https://programming-zero.net/notion-api-setting/)
 * [Notion APIでデータベースを操作する](https://qiita.com/thomi40/items/fe2a828746f31ad827ba)
+* [Notion APIのデータ構造を実際にAPIを叩きながら理解する](https://qiita.com/senju797/items/0e3bfb1c8f0b7b035f46)
