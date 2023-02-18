@@ -41,7 +41,7 @@ export async function notionApiRead(app, opts): Promise<void> {
     const response = await notion.search({
       filter: {
         value: 'database',
-        property: 'object'
+        property: 'object',
       },
     });
     return response;

@@ -174,4 +174,39 @@ export async function notionApiPost(app, opts): Promise<void> {
     });
     return response;
   });
+
+  app.get('/apend_blocks', async (req, res) => {
+    const response = await notion.blocks.children.append({
+      block_id: req.query.page_id,
+      children: [
+        {
+          heading_2: {
+            rich_text: [
+              {
+                text: {
+                  content: 'Lacinato kale',
+                },
+              },
+            ],
+          },
+        },
+        {
+          paragraph: {
+            rich_text: [
+              {
+                text: {
+                  content:
+                    'Lacinato kale is a variety of kale with a long tradition in Italian cuisine, especially that of Tuscany. It is also known as Tuscan kale, Italian kale, dinosaur kale, kale, flat back kale, palm tree kale, or black Tuscan palm.',
+                  link: {
+                    url: 'https://en.wikipedia.org/wiki/Lacinato_kale',
+                  },
+                },
+              },
+            ],
+          },
+        },
+      ],
+    });
+    return response;
+  });
 }
