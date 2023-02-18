@@ -1,8 +1,8 @@
-import { Client } from "@notionhq/client"
+import { Client } from '@notionhq/client';
 
 const notion = new Client({
   auth: process.env.NOTION_INTERNAL_INTEGRATION_TOKEN,
-})
+});
 
 export async function notionApiRead(app, opts): Promise<void> {
   app.get('/', async (req, res) => {
@@ -10,7 +10,7 @@ export async function notionApiRead(app, opts): Promise<void> {
   });
 
   app.get('/users', async (req, res) => {
-    const listUsersResponse = await notion.users.list({})
+    const listUsersResponse = await notion.users.list({});
     return listUsersResponse;
   });
 
@@ -20,7 +20,7 @@ export async function notionApiRead(app, opts): Promise<void> {
   });
 
   app.get('/pages', async (req, res) => {
-    const response = await notion.search({})
+    const response = await notion.search({});
     return response;
   });
 }
