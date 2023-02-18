@@ -156,6 +156,34 @@ return response;
 ドキュメントなどでは `block_id` を指定するように書かれているが、実態は`page_id` を指定するとBlockの情報を取得できる。
 一回でとれるBlockの数はMAXで100件まで、件数は `page_size` にて指定できる。
 
+### Page内にBlockを書き込んでいきたい
+
+以下のように `notion.blocks.children.append` を実行することでPage内にさまざまな要素を記述していくことができます(Blockを末尾に追加するという意味)
+
+```typescript
+const response = await notion.blocks.children.append({
+  block_id: 'page_id',
+  children: [
+    {
+      heading_2: {
+        rich_text: [
+          {
+            text: {
+              content: 'Lacinato kale',
+            },
+          },
+        ],
+      },
+    },
+    ...
+  ],
+});
+return response;
+```
+
+ドキュメントなどでは `block_id` を指定するように書かれているが、実態は`page_id` を指定するとPage内にBlockを追加することができる。
+グラフとか画像とかも追加することができるかも?
+
 ## 参考
 
 * [Notion API Referernce](https://developers.notion.com/reference)
