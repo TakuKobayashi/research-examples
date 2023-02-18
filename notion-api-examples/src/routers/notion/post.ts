@@ -28,6 +28,56 @@ export async function notionApiPost(app, opts): Promise<void> {
     return response;
   });
 
+  app.get('/create_sample_page_with_block', async (req, res) => {
+    const response = await notion.pages.create({
+      parent: {
+        type: 'page_id',
+        page_id: '9b9e71fe09f34566a5aebc3748dfb338',
+      },
+      properties: {
+        title: [
+          {
+            text: {
+              content: 'Notion API Test',
+            },
+          },
+        ],
+      },
+      children: [
+        {
+          object: 'block',
+          heading_2: {
+            rich_text: [
+              {
+                text: {
+                  content: 'Lacinato kale',
+                },
+              },
+            ],
+          },
+        },
+        {
+          object: 'block',
+          paragraph: {
+            rich_text: [
+              {
+                text: {
+                  content:
+                    'Lacinato kale is a variety of kale with a long tradition in Italian cuisine, especially that of Tuscany. It is also known as Tuscan kale, Italian kale, dinosaur kale, kale, flat back kale, palm tree kale, or black Tuscan palm.',
+                  link: {
+                    url: 'https://en.wikipedia.org/wiki/Lacinato_kale',
+                  },
+                },
+              },
+            ],
+            color: 'default',
+          },
+        },
+      ],
+    });
+    return response;
+  });
+
   app.get('/create_sample_database', async (req, res) => {
     const response = await notion.databases.create({
       parent: {
