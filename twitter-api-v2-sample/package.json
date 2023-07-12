@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "@fastify/aws-lambda": "^3.1.1",
-    "fastify": "^4.4.0"
+    "fastify": "^4.4.0",
+    "twitter-api-sdk": "^1.2.1"
   },
   "devDependencies": {
     "@serverless/typescript": "^3.21.0",
