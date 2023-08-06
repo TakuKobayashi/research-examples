@@ -12,7 +12,21 @@ const authClient = new auth.OAuth2User({
   client_id: process.env.TWITTER_OAUTH2_CLIENT_ID,
   client_secret: process.env.TWITTER_OAUTH2_CLIENT_SECRET,
   callback: "http://localhost:3000/dev/twitter/oauth/callback",
-  scopes: ["tweet.read", "users.read", "offline.access"],
+  scopes: [
+    "tweet.read",
+    "tweet.write",
+    "tweet.moderate.write",
+    "users.read",
+    "follows.read",
+    "follows.write",
+    "offline.access",
+    "like.read",
+    "like.write",
+    "space.read",
+    "list.read",
+    "block.read",
+    "bookmark.read",
+  ],
 });
 
 app.get('/twitter/auth', (req, reply) => {
