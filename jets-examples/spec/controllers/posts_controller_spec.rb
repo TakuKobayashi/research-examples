@@ -1,18 +1,15 @@
-require 'spec_helper'
-
 # Example:
-# RSpec.describe PostsController, type: :controller do
+# describe PostsController, type: :controller do
 #   it "index returns a success response" do
-#     event = payload("posts-index")
-#     controller = PostsController.new(event)
-#     response = controller.index
-#     # pp response
+#     get '/posts'
+#     expect(response.status).to eq 200
+#     pp response.body
 #   end
-
+#
 #   it "show returns a success response" do
-#     event = payload("posts-show")
-#     controller = PostsController.new(event)
-#     response = controller.show
-#     # pp response
+#     Post.create(id: 1) unless Post.find_by(id: 1) # TODO: set up factory_bot
+#     get '/posts/:id', id: 1
+#     expect(response.status).to eq 200
+#     pp response.body
 #   end
 # end

@@ -1,22 +1,23 @@
 default: &default
-  adapter: postgresql
-  encoding: utf8
+  adapter: mysql2
+  encoding: utf8mb4
   pool: <%= ENV["DB_POOL"] || 5  %>
-  database: <%= ENV['DB_NAME'] || 'jets-examples_dev' %>
-  username: <%= ENV['DB_USER'] || ENV['USER'] %>
+  database: <%= ENV['DB_NAME'] || 'jets_examples_development' %>
+  username: <%= ENV['DB_USER'] || 'root' %>
   password: <%= ENV['DB_PASS'] %>
   host: <%= ENV["DB_HOST"] %>
   url: <%= ENV['DATABASE_URL'] %> # takes higher precedence than other settings
+  reconnect: true
 
 development:
   <<: *default
-  database: <%= ENV['DB_NAME'] || 'jets-examples_dev' %>
+  database: <%= ENV['DB_NAME'] || 'jets_examples_development' %>
 
 test:
   <<: *default
-  database: jets-examples_test
+  database: jets_examples_test
 
 production:
   <<: *default
-  database: jets-examples_prod
+  database: jets_examples_production
   url: <%= ENV['DATABASE_URL'] %>
