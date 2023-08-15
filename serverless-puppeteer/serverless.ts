@@ -12,7 +12,7 @@ const serverlessConfiguration: AWS = {
     runtime: 'nodejs16.x',
     region: 'ap-northeast-1',
     timeout: 900,
-    memorySize: 128,
+    memorySize: 512,
     apiGateway: {
       minimumCompressionSize: 1024,
       shouldStartNameWithService: true,
@@ -50,7 +50,7 @@ const serverlessConfiguration: AWS = {
       bundle: true,
       minify: false,
       sourcemap: true,
-      external: ["@sparticuz/chromium"],
+      external: ["puppeteer-core","@sparticuz/chromium"],
       exclude: ['aws-sdk'],
       target: 'node16',
       define: { 'require.resolve': undefined },

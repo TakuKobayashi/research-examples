@@ -3,7 +3,11 @@ import express from 'express';
 import cors from 'cors';
 const puppeteer = require("puppeteer-core");
 const chromium = require("@sparticuz/chromium");
+const fs = require('fs');
 // https://www.serverless.com/examples/aws-node-puppeteer
+
+chromium.setHeadlessMode = true;
+chromium.setGraphicsMode = false;
 
 const app = express();
 app.use(cors());
@@ -21,21 +25,19 @@ app.get('/screenshot', async (request, res) => {
     defaultViewport: chromium.defaultViewport,
     executablePath: await chromium.executablePath(),
     headless: chromium.headless,
-    ignoreHTTPSErrors: true,
   });
 
   const page = await browser.newPage();
 
-  await page.goto("https://google.co.jp", { waitUntil: "networkidle0" });
+  await page.goto("https://google.co.jp", { waitUntil: 'domcontentloaded' });
 
-  const pdf = await page.pdf({ format: "A4" });
+  const path = "/tmp/screenshot.png"
+  const screenshot = await page.screenshot({ fullPage: true, path: path, type: "png" });
 
   await browser?.close();
 
-  res.setHeader("Content-Type", "application/pdf");
-  res.setHeader("Accept-Ranges", "bytes");
-  res.setHeader("Content-Disposition", `inline; filename=file.pdf`);
-  res.send(pdf);
+  res.setHeader("Content-Type", "image/png");
+  res.send(screenshot);
 });
 
 export const handler = serverlessExpress({ app });
