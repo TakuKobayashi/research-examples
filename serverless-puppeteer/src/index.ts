@@ -1,39 +1,41 @@
-import awsLambdaFastify from '@fastify/aws-lambda';
-import fastify from 'fastify';
-const chromium = require('chrome-aws-lambda');
-//const puppeteer = chromium.puppeteer;
-const puppeteer = require("puppeteer");
+import serverlessExpress from '@vendia/serverless-express';
+import express from 'express';
+import cors from 'cors';
+const puppeteer = require("puppeteer-core");
+const chromium = require("@sparticuz/chromium");
 // https://www.serverless.com/examples/aws-node-puppeteer
 
-const app = fastify();
+const app = express();
+app.use(cors());
 
-app.get('/', async (request, reply) => {
-  return {hello: "world"}
-})
-
-app.get('/screenshot', async (request, reply) => {
-  console.log(request.query.url)
-    const viewport = {width: 1024, height: 800};
-    //await chromium.font('https://raw.githack.com/googlei18n/noto-cjk/master/NotoSansJP-Black.otf');
-    //const chromiumExecutablePath = await chromium.executablePath
-    const browser = await puppeteer.launch({
-      //defaultViewport: viewport,
-      //headless: true,
-      //executablePath: chromiumExecutablePath,
-      //args: chromium.args,
-    });
-
-    const page = await browser.newPage();
-    await page.goto(request.query.url, {
-      waitUntil: ['domcontentloaded', 'networkidle0'],
-    });
-
-    const image = await page.screenshot({
-      clip: { x: 0, y: 0, ...viewport },
-      encoding: 'base64'
-    });
-    await browser.close();
-    reply.send(image);
+app.get('/test', (req, res) => {
+  res.json({ hello: 'world' });
 });
 
-export const handler = awsLambdaFastify(app);
+app.get('/screenshot', async (request, res) => {
+//  console.log(request.query.url);
+  //await chromium.font('https://raw.githack.com/googlei18n/noto-cjk/master/NotoSansJP-Black.otf');
+  //const chromiumExecutablePath = await chromium.executablePath
+  const browser = await puppeteer.launch({
+    args: chromium.args,
+    defaultViewport: chromium.defaultViewport,
+    executablePath: await chromium.executablePath(),
+    headless: chromium.headless,
+    ignoreHTTPSErrors: true,
+  });
+
+  const page = await browser.newPage();
+
+  await page.goto("https://google.co.jp", { waitUntil: "networkidle0" });
+
+  const pdf = await page.pdf({ format: "A4" });
+
+  await browser?.close();
+
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Accept-Ranges", "bytes");
+  res.setHeader("Content-Disposition", `inline; filename=file.pdf`);
+  res.send(pdf);
+});
+
+export const handler = serverlessExpress({ app });
