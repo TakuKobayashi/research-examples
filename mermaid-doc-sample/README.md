@@ -9,10 +9,10 @@ erDiagram
   posts ||--o{ comments: "1つの投稿は0以上のコメントを持つ"
 
   users {
-    bigint id PK
-    string name "ユーザー名"
-    timestamp created_at
-    timestamp deleted_at
+    int(11) id PK
+    varchar(255) name "ユーザー名"
+    datetime created_at
+    datetime deleted_at
   }
 
   posts {
