@@ -1,0 +1,36 @@
+{
+  "name": "serverless-ffmpeg",
+  "version": "1.0.0",
+  "description": "Serverless aws-nodejs-typescript template",
+  "main": "serverless.ts",
+  "scripts": {
+    "format": "prettier --config .prettierrc --write \"**/*.ts\"",
+    "serverless": "serverless"
+  },
+  "engines": {
+    "node": ">=14.15.0"
+  },
+  "dependencies": {
+    "@vendia/serverless-express": "^4.10.4",
+    "cors": "^2.8.5",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "@serverless/typescript": "^3.30.1",
+    "@types/aws-lambda": "^8.10.119",
+    "@types/express": "^4.17.17",
+    "@types/node": "^20.5.0",
+    "dotenv": "^16.0.1",
+    "esbuild": "^0.14.54",
+    "prettier": "^2.7.1",
+    "serverless": "^3.21.0",
+    "serverless-dotenv-plugin": "^4.0.2",
+    "serverless-esbuild": "^1.32.5",
+    "serverless-offline": "^9.1.7",
+    "ts-node": "^10.9.1",
+    "tsconfig-paths": "^4.1.0",
+    "typescript": "^4.7.4"
+  },
+  "author": "The serverless webpack authors (https://github.com/elastic-coders/serverless-webpack)",
+  "license": "MIT"
+}
