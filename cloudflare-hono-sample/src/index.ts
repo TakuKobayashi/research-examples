@@ -28,11 +28,23 @@ app.get('/db/queryping', async (c) => {
   }
 })
 
-app.get('/db/prismaping', async (c) => {
+app.get('/db/prisma/ping', async (c) => {
   const adapter = new PrismaD1(c.env.DB)
   const prisma = new PrismaClient({ adapter });
   const users = await prisma.user.findMany();
   return c.json(users)
+})
+
+app.get('/db/prisma/create/random', async (c) => {
+  const adapter = new PrismaD1(c.env.DB)
+  const prisma = new PrismaClient({ adapter });
+  const user = await prisma.user.create({
+    data: {
+      email: Math.random().toString(32).substring(2),
+      name: Math.random().toString(32).substring(2),
+    }
+  })
+  return c.json(user)
 })
 
 export default app
