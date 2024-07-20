@@ -1,4 +1,6 @@
 import { Hono } from 'hono'
+import { PrismaClient } from '@prisma/client'
+import { PrismaD1 } from '@prisma/adapter-d1'
 
 type Bindings = {
   DB: D1Database;
@@ -24,6 +26,13 @@ app.get('/db/queryping', async (c) => {
   } catch (e: any) {
     return c.json({ err: e.message }, 500);
   }
+})
+
+app.get('/db/prismaping', async (c) => {
+  const adapter = new PrismaD1(c.env.DB)
+  const prisma = new PrismaClient({ adapter });
+  const users = await prisma.user.findMany();
+  return c.json(users)
 })
 
 export default app
