@@ -3,15 +3,19 @@
   "scripts": {
     "dev": "wrangler dev src/index.ts",
     "deploy": "wrangler deploy --minify src/index.ts",
+    "prisma": "prisma",
     "d1:database:create": "wrangler d1 create",
     "d1:migration:create": "wrangler d1 migrations create",
     "d1:migration:apply": "wrangler d1 migrations apply"
   },
   "dependencies": {
+    "@prisma/adapter-d1": "^5.17.0",
+    "@prisma/client": "^5.17.0",
     "hono": "^4.4.10"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240529.0",
+    "prisma": "^5.17.0",
     "wrangler": "^3.57.2"
   }
 }
