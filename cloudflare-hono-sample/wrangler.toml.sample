@@ -8,13 +8,17 @@ compatibility_date = "2023-12-01"
 # binding = "MY_KV_NAMESPACE"
 # id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
+[[kv_namespaces]]
+binding = "cloudflare_hono_sample"
+id = ""
+
 # [[r2_buckets]]
 # binding = "MY_BUCKET"
 # bucket_name = "my-bucket"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "my-database"
+database_name = "cloudflare-hono-sample"
 database_id = ""
 
 # [ai]
