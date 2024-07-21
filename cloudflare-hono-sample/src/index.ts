@@ -1,9 +1,11 @@
+import { KVNamespace, D1Database } from '@cloudflare/workers-types'
 import { Hono } from 'hono'
 import { PrismaClient } from '@prisma/client'
 import { PrismaD1 } from '@prisma/adapter-d1'
 
 type Bindings = {
   DB: D1Database;
+  KV: KVNamespace;
 };
 
 const app = new Hono<{ Bindings: Bindings }>()
@@ -14,6 +16,21 @@ app.get('/', (c) => {
 
 app.get('/json', (c) => {
   return c.json({hello: "Hono JSON"})
+})
+
+app.get('/kv/getsample', async (c) => {
+  const kv = c.env.KV;
+  console.log(kv)
+  const kvList = await kv.list();
+  return c.json(kvList)
+})
+
+app.get('/kv/putsample', async (c) => {
+  const kv = c.env.KV;
+  const key = Math.random().toString(32).substring(2);
+  const value = Math.random().toString(32).substring(2);
+  await kv.put(key, value);
+  return c.json({key: key, value: value})
 })
 
 app.get('/db/queryping', async (c) => {

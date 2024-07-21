@@ -9,7 +9,7 @@ compatibility_date = "2023-12-01"
 # id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 [[kv_namespaces]]
-binding = "cloudflare_hono_sample"
+binding = "KV"
 id = ""
 
 # [[r2_buckets]]
