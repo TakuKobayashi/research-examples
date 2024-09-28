@@ -4,13 +4,9 @@ compatibility_date = "2023-12-01"
 # [vars]
 # MY_VAR = "my-variable"
 
-# [[kv_namespaces]]
-# binding = "MY_KV_NAMESPACE"
-# id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-
 [[kv_namespaces]]
 binding = "KV"
-id = ""
+id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 # [[r2_buckets]]
 # binding = "MY_BUCKET"
@@ -19,7 +15,8 @@ id = ""
 [[d1_databases]]
 binding = "DB"
 database_name = "cloudflare-hono-sample"
-database_id = ""
+database_id = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+migrations_dir = "prisma/migrations/20240928175921_create_tables"
 
 # [ai]
 # binding = "AI"
