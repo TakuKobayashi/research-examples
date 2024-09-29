@@ -5,6 +5,7 @@
     "deploy": "wrangler deploy --minify src/index.ts",
     "prisma": "prisma",
     "wrangler": "wrangler",
+    "put-secrets": "node scripts/convert-dotenv-to-json.js | wrangler secret bulk .env.json",
     "format": "prettier --config .prettierrc --write \"src/**/*.{ts,js}\""
   },
   "dependencies": {
@@ -14,6 +15,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240925.0",
+    "dotenv": "^16.4.5",
     "prettier": "^3.3.3",
     "prisma": "^5.20.0",
     "wrangler": "^3.78.12"
