@@ -1,0 +1,49 @@
+version: "3.8"
+
+# ============================================================
+# ローカル LiveKit 開発環境
+#
+# 起動:   npm run livekit:up
+# 停止:   npm run livekit:down
+# ログ:   npm run livekit:logs
+#
+# LiveKit Dashboard: http://localhost:7880
+# TURN / WebRTC:     UDP 50000-60000
+# ============================================================
+
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  livekit:
+    image: livekit/livekit-server:latest
+    restart: unless-stopped
+    ports:
+      - "7880:7880"       # HTTP / WebSocket
+      - "7881:7881"       # RTC TCP
+      - "7882:7882/udp"   # RTC UDP
+      - "50000-50020:50000-50020/udp"  # TURN UDP
+    volumes:
+      - ./livekit.yaml:/etc/livekit.yaml:ro
+    command: --config /etc/livekit.yaml
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:7880/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  redis_data:

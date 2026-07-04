@@ -1,0 +1,11 @@
+name: japanese-address-research
+slug: japanese-address-research
+description_ja: 日本の住所データを使い、住所の正規化や検索・変換処理の検証を行う調査用プロジェクト。
+status: incubating
+repo: null
+tags:
+  - Japanese address
+  - data
+  - normalization
+  - research
+description: A survey project that uses Japanese address data to verify address normalization and search/convert processing。

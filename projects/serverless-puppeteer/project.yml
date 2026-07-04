@@ -1,0 +1,11 @@
+name: serverless-puppeteer
+slug: serverless-puppeteer
+description_ja: AWS Lambda 上で puppeteer-core と chromium を動かし、サーバーレス環境でのブラウザ自動操作を検証するサンプルプロジェクト。
+status: incubating
+repo: null
+tags:
+  - Serverless Framework
+  - Puppeteer
+  - AWS Lambda
+  - TypeScript
+description: A sample project that runs puppeteer-core and chromium on pu da to verify browser auto-operation in serverless environments。

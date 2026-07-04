@@ -1,0 +1,127 @@
+name: Sync Projects
+
+on:
+  push:
+    paths:
+      - 'projects/**'
+      - 'scripts/**'
+      - 'templates/**'
+      - 'portfolio/**'
+      - 'docker-compose.yml'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.gitmodules'
+      - '.github/workflows/projects-sync.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: projects-sync-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          submodules: true
+          fetch-depth: 0
+          ssh-key: ${{ secrets.SUBMODULE_SSH_KEY }}
+
+      # =========================
+      # pnpm setup (UPDATED)
+      # =========================
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10
+
+      # =========================
+      # Node.js (UPDATED)
+      # =========================
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Cache LibreTranslate data
+        uses: actions/cache@v4
+        with:
+          path: docker/libretranslate
+          key: ${{ runner.os }}-libretranslate-data-${{ hashFiles('docker-compose.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-libretranslate-data-
+
+      # =========================
+      # LibreTranslate (Docker)
+      # =========================
+      - name: Ensure Docker Compose exists
+        run: docker compose version
+
+      - name: Start LibreTranslate
+        run: |
+          mkdir -p docker/libretranslate
+          docker compose up -d
+
+      - name: Wait for LibreTranslate health
+        run: |
+          for i in {1..60}; do
+            if curl -fs http://localhost:5000/languages > /dev/null; then
+              echo "LibreTranslate is ready"
+              exit 0
+            fi
+            echo "Waiting for LibreTranslate..."
+            sleep 5
+          done
+
+          echo "LibreTranslate failed to start"
+          docker compose logs
+          exit 1
+
+      # =========================
+      # Sync pipeline
+      # =========================
+      - name: Validate projects
+        run: pnpm run projects:validate
+
+      - name: Sync projects
+        run: pnpm run projects:sync
+
+      - name: Format repository
+        run: pnpm run format
+
+      # =========================
+      # Commit changes
+      # =========================
+      - name: Commit and push changes
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+
+          git add .
+
+          git diff --cached --quiet && echo "No changes" && exit 0
+
+          git commit -m "Auto sync projects"
+          git push
+
+      # =========================
+      # Debug on failure
+      # =========================
+      - name: Debug LibreTranslate logs on failure
+        if: failure()
+        run: docker compose logs
+
+      - name: Stop LibreTranslate
+        if: always()
+        run: docker compose down

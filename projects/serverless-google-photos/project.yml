@@ -1,0 +1,11 @@
+name: serverless-google-photos
+slug: serverless-google-photos
+description_ja: Google Photos API と googleapis を Serverless Framework 上で扱い、写真データ連携を検証する TypeScript サンプルプロジェクト。
+status: incubating
+repo: null
+tags:
+  - Serverless Framework
+  - Google Photos API
+  - Fastify
+  - TypeScript
+description: A sample project that handles Google Photos API and googleapis on Serverless Framework to verify photo data collaboration.

@@ -1,0 +1,11 @@
+name: serverless-github-upload-reources
+slug: serverless-github-upload-reources
+description_ja: Serverless Framework、Fastify、Octokit を使い、GitHub リポジトリへのリソースアップロード API を検証するサンプルプロジェクト。
+status: incubating
+repo: null
+tags:
+  - Serverless Framework
+  - GitHub API
+  - Fastify
+  - TypeScript
+description: A sample project that uses Serverless Framework, Verify and Octokit to verify the resource upload API to the GitHub repository。

@@ -1,0 +1,11 @@
+name: nextjs-webrtc-sample
+slug: nextjs-webrtc-sample
+description_ja: Next.js 上で WebRTC を使った通信機能を試し、ブラウザ間のリアルタイム通信を検証するサンプルプロジェクト。
+status: incubating
+repo: null
+tags:
+  - Next.js
+  - WebRTC
+  - React
+  - real-time
+description: A sample project that uses WebRTC to test real-time communication between browsers。

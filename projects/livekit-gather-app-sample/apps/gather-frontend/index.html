@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja" ng-app="gatherApp">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gather-like App</title>
+  <link rel="stylesheet" href="/src/styles/main.css" />
+</head>
+<body ng-controller="WorldController as vm">
+
+  <!-- ============================================================
+       セットアップ画面
+  ============================================================ -->
+  <div class="setup-overlay" ng-if="!vm.started">
+    <div class="setup-card">
+      <div class="setup-logo">🌐</div>
+      <h1>Gather-like App</h1>
+      <p class="setup-sub">LiveKit × PartyKit による近接ビデオチャット</p>
+
+      <div class="field">
+        <label>あなたの名前</label>
+        <input ng-model="vm.cfg.displayName"
+               placeholder="Player"
+               ng-keyup="$event.keyCode === 13 && vm.start()" />
+      </div>
+
+      <div class="field">
+        <label>ルーム名</label>
+        <input ng-model="vm.cfg.roomName"
+               placeholder="world-1"
+               ng-keyup="$event.keyCode === 13 && vm.start()" />
+      </div>
+
+      <details class="adv-toggle">
+        <summary>詳細設定</summary>
+        <div class="adv-body">
+          <div class="field">
+            <label>LiveKit Server URL</label>
+            <input ng-model="vm.cfg.livekitUrl"
+                   placeholder="ws://localhost:7880" />
+          </div>
+          <div class="field">
+            <label>API エンドポイント</label>
+            <input ng-model="vm.cfg.apiBase"
+                   placeholder="http://localhost:8787" />
+          </div>
+          <div class="field">
+            <label>PartyKit Host</label>
+            <input ng-model="vm.cfg.partyHost"
+                   placeholder="localhost:1999" />
+          </div>
+        </div>
+      </details>
+
+      <button class="join-btn"
+              ng-click="vm.start()"
+              ng-disabled="vm.starting || !vm.cfg.displayName">
+        {{vm.starting ? '接続中…' : 'ワールドに入る →'}}
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       ビデオバー — 画面上部スライドイン (Gather スタイル)
+  ============================================================ -->
+  <div class="video-bar" ng-class="{ open: vm.chat.connected }">
+    <div class="video-tiles">
+
+      <!-- ローカル映像タイル -->
+      <div class="video-tile tile-local" ng-if="vm.chat.connected">
+        <div class="tile-avatar" ng-if="vm.camOff">
+          <span>{{vm.cfg.displayName | limitTo:1 | uppercase}}</span>
+        </div>
+        <video id="local-video" autoplay muted playsinline></video>
+        <span class="tile-label">{{vm.cfg.displayName}} (あなた)</span>
+        <span class="tile-badge muted" ng-if="vm.micMuted">🔇</span>
+      </div>
+
+      <!-- リモート参加者タイル -->
+      <div class="video-tile"
+           ng-repeat="p in vm.chat.participants track by p.identity">
+        <div class="tile-avatar">
+          <span>{{p.identity | limitTo:1 | uppercase}}</span>
+        </div>
+        <video id="rv-{{p.identity}}" autoplay playsinline></video>
+        <audio id="ra-{{p.identity}}" autoplay></audio>
+        <span class="tile-label">{{p.identity}}</span>
+      </div>
+    </div>
+
+    <div class="bar-spacer"></div>
+
+    <div class="bar-meta" ng-if="vm.chat.connected">
+      <div class="bar-room-label">接続中</div>
+      <div class="bar-room-name">{{vm.cfg.roomName}}</div>
+    </div>
+
+    <div class="bar-controls" ng-if="vm.chat.connected">
+      <button class="ctrl-btn" title="マイク切替"
+              ng-class="{'ctrl-off': vm.micMuted}"
+              ng-click="vm.toggleMic()">
+        {{vm.micMuted ? '🔇' : '🎤'}}
+      </button>
+      <button class="ctrl-btn" title="カメラ切替"
+              ng-class="{'ctrl-off': vm.camOff}"
+              ng-click="vm.toggleCam()">
+        {{vm.camOff ? '📷' : '📸'}}
+      </button>
+      <button class="leave-btn" ng-click="vm.manualDisconnect()">退出</button>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       ゲームキャンバス
+  ============================================================ -->
+  <canvas id="worldCanvas" ng-if="vm.started"></canvas>
+
+  <!-- ============================================================
+       HUD (画面下部)
+  ============================================================ -->
+  <div class="hud" ng-if="vm.started">
+    <div class="toast toast-nearby"
+         ng-if="vm.nearbyName && !vm.chat.connected && !vm.connecting">
+      👥 <strong>{{vm.nearbyName}}</strong> が近くにいます…
+    </div>
+    <div class="toast toast-connecting" ng-if="vm.connecting">
+      ⏳ ビデオチャット接続中…
+    </div>
+    <div class="hud-hint">
+      WASD / 矢印キー で移動 ·
+      <span class="hud-players">👤 {{vm.playerCount}} 人</span>
+    </div>
+  </div>
+
+  <!-- エラーバナー -->
+  <div class="error-banner" ng-if="vm.errorMsg">
+    ⚠️ {{vm.errorMsg}}
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

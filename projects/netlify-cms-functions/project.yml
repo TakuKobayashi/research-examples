@@ -1,0 +1,11 @@
+name: netlify-cms-functions
+slug: netlify-cms-functions
+description_ja: Netlify Functions と Netlify CMS を Gatsby サイトへ組み込み、CMS 管理画面や Functions の動作を調査するサンプルプロジェクト。
+status: incubating
+repo: null
+tags:
+  - Netlify
+  - Netlify Functions
+  - Netlify CMS
+  - Gatsby
+description: A sample project that incorporates Netlify Functions and Netlify CMS to the G by site and investigates the operation of CMS management and Functions。

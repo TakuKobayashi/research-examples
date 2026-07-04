@@ -1,0 +1,11 @@
+name: serverless-python-flask
+slug: serverless-python-flask
+description_ja: Serverless Framework を使い、Python と Flask のアプリケーションを AWS Lambda にデプロイする構成を検証するサンプルプロジェクト。
+status: incubating
+repo: null
+tags:
+  - Serverless Framework
+  - Python
+  - Flask
+  - AWS Lambda
+description: A sample project that uses Serverless Framework to verify the configuration of deploying Python and Flask applications to Python da。

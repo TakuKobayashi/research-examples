@@ -1,0 +1,27 @@
+{
+  "name": "@ela-api/frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "npm run build:docs && next build",
+    "build:next": "next build",
+    "start": "next start",
+    "build:docs": "redoc-cli build ../../../docs/swagger.yml --output public/api-reference.html --title 'ELA API Reference' --options.theme.colors.primary.main='#00e5ff' --options.hideDownloadButton=false",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx}\""
+  },
+  "dependencies": {
+    "next": "^15.3.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.21",
+    "@types/react": "^19.1.4",
+    "@types/react-dom": "^19.1.2",
+    "prettier": "^3.5.3",
+    "redoc-cli": "^0.13.21",
+    "typescript": "^5.8.3"
+  }
+}

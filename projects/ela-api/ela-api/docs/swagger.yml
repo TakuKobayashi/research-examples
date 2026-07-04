@@ -1,0 +1,298 @@
+openapi: 3.1.0
+info:
+  title: ELA (Error Level Analysis) API
+  version: 1.0.0
+  description: |
+    ## ELA (Error Level Analysis) API
+
+    Error Level Analysis（ELA）は、画像の改ざん・編集箇所を検出するための画像フォレンジクス手法です。
+
+    ### ELA の仕組み
+
+    1. **再圧縮**: 元の画像を特定の JPEG 品質（デフォルト: 75）で再圧縮します。
+    2. **差分計算**: 元画像と再圧縮画像のピクセル単位の絶対差分を計算します。
+    3. **増幅**: 差分値をスケール係数（デフォルト: 10）で増幅し、視覚化します。
+
+    ### 結果の読み方
+
+    - **明るい領域（白・高輝度）**: 圧縮アーティファクトが大きい = 元画像の構成から外れている可能性 → **改ざんの疑いあり**
+    - **暗い領域（黒・低輝度）**: 圧縮アーティファクトが小さい = 均一な圧縮レベル → **改ざんの疑いなし**
+    - **均一なパターン**: 画像全体が均一な ELA レベルを示している場合は改ざんなしの可能性が高い
+
+    ### 注意事項
+
+    - ELA は JPEG 画像に最も効果的です。PNG や WebP は事前に JPEG 変換されます。
+    - ELA は補助ツールであり、単独での判断には限界があります。
+    - 複数回再保存された画像は誤検知が増える場合があります。
+
+    ### ランタイム
+
+    | エンドポイント | ランタイム | 画像処理ライブラリ |
+    |---|---|---|
+    | Cloudflare Workers | V8 Isolate | Jimp (Pure JS) |
+    | AWS Lambda (Jimp) | Node.js 22.x | Jimp (Pure JS) |
+    | AWS Lambda (Sharp) | Node.js 22.x | Sharp (libvips) |
+
+  contact:
+    name: ELA API Support
+  license:
+    name: MIT
+
+servers:
+  - url: https://ela-api-worker.{subdomain}.workers.dev
+    description: Cloudflare Workers (Production)
+    variables:
+      subdomain:
+        default: your-account
+        description: Your Cloudflare account subdomain
+  - url: https://{api-id}.execute-api.{region}.amazonaws.com/{stage}
+    description: AWS API Gateway (Lambda)
+    variables:
+      api-id:
+        default: xxxxxxxxxx
+        description: API Gateway ID
+      region:
+        default: ap-northeast-1
+        description: AWS Region
+      stage:
+        default: prod
+        description: Deployment stage
+  - url: http://localhost:8787
+    description: Cloudflare Workers (Local dev)
+  - url: http://localhost:3001
+    description: Lambda Jimp (Local dev)
+  - url: http://localhost:3002
+    description: Lambda Sharp (Local dev)
+
+tags:
+  - name: health
+    description: ヘルスチェック
+  - name: ela
+    description: Error Level Analysis
+
+paths:
+  /api/health:
+    get:
+      tags:
+        - health
+      summary: ヘルスチェック
+      description: |
+        API サーバーの稼働状態を確認します。
+        レスポンスにはランタイム情報（`cloudflare-workers`, `aws-lambda-jimp`, `aws-lambda-sharp`）が含まれます。
+      operationId: getHealth
+      responses:
+        '200':
+          description: サーバーは正常に稼働しています
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              examples:
+                cloudflare:
+                  summary: Cloudflare Workers
+                  value:
+                    status: ok
+                    runtime: cloudflare-workers
+                    timestamp: '2025-05-01T00:00:00.000Z'
+                lambda-jimp:
+                  summary: AWS Lambda (Jimp)
+                  value:
+                    status: ok
+                    runtime: aws-lambda-jimp
+                    timestamp: '2025-05-01T00:00:00.000Z'
+                lambda-sharp:
+                  summary: AWS Lambda (Sharp)
+                  value:
+                    status: ok
+                    runtime: aws-lambda-sharp
+                    timestamp: '2025-05-01T00:00:00.000Z'
+
+  /api/ela:
+    post:
+      tags:
+        - ela
+      summary: ELA 解析を実行する
+      description: |
+        アップロードされた画像に対して Error Level Analysis を実行し、結果画像（PNG）を返します。
+
+        ### リクエスト形式
+
+        `multipart/form-data` 形式で以下のフィールドを送信してください：
+
+        | フィールド | 型 | 必須 | 説明 |
+        |---|---|---|---|
+        | `image` | file | ✅ | 解析する画像ファイル（JPEG / PNG / WebP） |
+        | `quality` | integer | ❌ | JPEG 再圧縮品質（1〜99、デフォルト: 75） |
+        | `scale` | integer | ❌ | 差分増幅係数（1〜50、デフォルト: 10） |
+
+        ### パラメータのチューニング
+
+        **quality（再圧縮品質）**:
+        - 値を下げる（例: 50）と、圧縮アーティファクトが強調されより高感度になりますが、誤検知も増えます。
+        - 値を上げる（例: 90）と、感度が下がりますが精度が向上します。
+
+        **scale（増幅係数）**:
+        - 値を上げると差分が強調され視覚化しやすくなります。
+        - 値を下げると微細な差分のみが表示されます。
+
+        ### レスポンス
+
+        解析成功時は PNG 形式の ELA 結果画像をバイナリで返します。
+        レスポンスヘッダーに解析パラメータが含まれます。
+
+      operationId: postEla
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ElaRequest'
+            encoding:
+              image:
+                contentType: image/jpeg, image/png, image/webp
+      responses:
+        '200':
+          description: ELA 解析成功。PNG 画像バイナリを返します。
+          headers:
+            X-ELA-Quality:
+              description: 使用した JPEG 再圧縮品質
+              schema:
+                type: integer
+                example: 75
+            X-ELA-Scale:
+              description: 使用した差分増幅係数
+              schema:
+                type: integer
+                example: 10
+            X-Original-Filename:
+              description: 元のファイル名
+              schema:
+                type: string
+                example: photo.jpg
+            X-Original-Size:
+              description: 元のファイルサイズ（バイト）
+              schema:
+                type: integer
+                example: 2048576
+            Content-Disposition:
+              description: ファイル名の指定
+              schema:
+                type: string
+                example: inline; filename="ela-result.png"
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+                description: ELA 解析結果の PNG 画像
+        '400':
+          description: リクエストが不正です
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missing-image:
+                  summary: 画像が未添付
+                  value:
+                    error: 'Missing required field: image (file)'
+                invalid-form:
+                  summary: フォームデータが不正
+                  value:
+                    error: Invalid multipart/form-data request
+        '413':
+          description: ファイルサイズが上限（10MB）を超えています
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Image too large. Maximum size is 10MB
+        '415':
+          description: サポートされていない画像形式です
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: 'Unsupported image type: image/gif. Allowed: jpeg, png, webp'
+        '500':
+          description: サーバー内部エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: Failed to process image. Ensure the file is a valid image.
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - runtime
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum:
+            - ok
+          description: サーバーの稼働状態
+          example: ok
+        runtime:
+          type: string
+          enum:
+            - cloudflare-workers
+            - aws-lambda-jimp
+            - aws-lambda-sharp
+          description: 実行環境
+          example: cloudflare-workers
+        timestamp:
+          type: string
+          format: date-time
+          description: レスポンス生成日時（ISO 8601）
+          example: '2025-05-01T00:00:00.000Z'
+
+    ElaRequest:
+      type: object
+      required:
+        - image
+      properties:
+        image:
+          type: string
+          format: binary
+          description: |
+            解析する画像ファイル。
+            対応形式: JPEG（.jpg / .jpeg）、PNG（.png）、WebP（.webp）
+            最大ファイルサイズ: 10MB
+        quality:
+          type: integer
+          minimum: 1
+          maximum: 99
+          default: 75
+          description: |
+            JPEG 再圧縮品質。
+            低いほど感度が高くなりますが誤検知も増えます。
+            推奨範囲: 50〜90
+          example: 75
+        scale:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 10
+          description: |
+            差分増幅係数。
+            高いほど差分が強調されます。
+            推奨範囲: 5〜20
+          example: 10
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: エラーメッセージ
+          example: Missing required field: image (file)

@@ -1,0 +1,11 @@
+name: notion-api-examples
+slug: notion-api-examples
+description_ja: Notion API と Notion SDK を使い、Fastify と Serverless Framework から Notion データを扱う方法を検証するサンプルプロジェクト。
+status: incubating
+repo: null
+tags:
+  - Notion API
+  - Serverless Framework
+  - Fastify
+  - TypeScript
+description: A sample project that uses the Notion API and the Notion SDK to verify how to handle Notion data from Fastify and Serverless Framework.

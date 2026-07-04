@@ -1,0 +1,12 @@
+{
+  "name": "chat-worker-d1-angular",
+  "main": "../worker-d1/src/index.ts",
+  "compatibility_date": "2024-07-25",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": { "directory": "./dist/browser", "binding": "ASSETS" },
+  "d1_databases": [{ "binding": "DB", "database_name": "chat-d1-db", "database_id": "your-database-id-here", "migrations_dir": "../worker-d1/src/db/migrations" }],
+  "durable_objects": { "bindings": [{ "name": "CHAT_ROOM", "class_name": "ChatRoom" }] },
+  "migrations": [{ "tag": "v1", "new_classes": ["ChatRoom"] }],
+  "vars": { "RP_ID": "localhost", "RP_NAME": "Chat App Angular", "RP_ORIGIN": "http://localhost:8789", "ENVIRONMENT": "development" },
+  "env": { "production": { "vars": { "RP_ID": "yourdomain.com", "RP_NAME": "ChatApp Angular", "RP_ORIGIN": "https://angular.yourdomain.com", "ENVIRONMENT": "production" } } }
+}

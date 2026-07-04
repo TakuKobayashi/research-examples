@@ -1,0 +1,25 @@
+{
+  "name": "webpush-demo",
+  "main": "src/worker/index.ts",
+  "compatibility_date": "2024-01-01",
+  "assets": {
+    "directory": "./out",
+    "binding": "ASSETS"
+  },
+  "vars": {
+    "VAPID_PUBLIC_KEY": "YOUR_PUBLIC_KEY_HERE",
+    "FCM_SERVER_KEY": "YOUR_FCM_SERVER_KEY"
+  },
+  "kv_namespaces": [
+    {
+      "binding": "SUBSCRIPTIONS",
+      "id": "your_kv_namespace_id",
+      "preview_id": "your_preview_kv_namespace_id"
+    },
+    {
+      "binding": "FCM_SUBSCRIPTIONS",
+      "id": "your_fcm_kv_namespace_id",
+      "preview_id": "your_fcm_preview_kv_namespace_id"
+    }
+  ]
+}

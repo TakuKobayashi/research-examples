@@ -1,0 +1,138 @@
+<!-- apps/gather-frontend/src/app/pages/world/world.component.html -->
+
+<!-- ============================================================
+     セットアップ画面
+============================================================ -->
+@if (!started) {
+  <div class="setup-overlay">
+    <div class="setup-card">
+      <div class="setup-logo">🌐</div>
+      <h1>Gather-like App</h1>
+      <p class="setup-sub">LiveKit × PartyKit による近接ビデオチャット</p>
+
+      <div class="field">
+        <label>あなたの名前</label>
+        <input [(ngModel)]="cfg.displayName"
+               placeholder="Player"
+               (keyup.enter)="start()" />
+      </div>
+
+      <div class="field">
+        <label>ルーム名</label>
+        <input [(ngModel)]="cfg.roomName"
+               placeholder="world-1"
+               (keyup.enter)="start()" />
+      </div>
+
+      <details class="adv-toggle">
+        <summary>詳細設定</summary>
+        <div class="adv-body">
+          <div class="field">
+            <label>LiveKit Server URL</label>
+            <input [(ngModel)]="cfg.livekitUrl" placeholder="ws://localhost:7880" />
+          </div>
+          <div class="field">
+            <label>API エンドポイント</label>
+            <input [(ngModel)]="cfg.apiBaseUrl" placeholder="http://localhost:8787" />
+          </div>
+          <div class="field">
+            <label>PartyKit Host</label>
+            <input [(ngModel)]="cfg.partyHost" placeholder="localhost:1999" />
+          </div>
+        </div>
+      </details>
+
+      <button class="join-btn"
+              [disabled]="starting || !cfg.displayName"
+              (click)="start()">
+        {{ starting ? '接続中…' : 'ワールドに入る →' }}
+      </button>
+    </div>
+  </div>
+}
+
+<!-- ============================================================
+     ビデオバー — 画面上部スライドイン
+============================================================ -->
+<div class="video-bar" [class.open]="chatConnected">
+  <div class="video-tiles">
+
+    <!-- ローカル映像タイル -->
+    @if (chatConnected) {
+      <div class="video-tile tile-local">
+        @if (camOff) {
+          <div class="tile-avatar">
+            <span>{{ cfg.displayName.charAt(0).toUpperCase() }}</span>
+          </div>
+        }
+        <video id="local-video" autoplay muted playsinline></video>
+        <span class="tile-label">{{ cfg.displayName }} (あなた)</span>
+        @if (micMuted) { <span class="tile-badge">🔇</span> }
+      </div>
+    }
+
+    <!-- リモート参加者タイル -->
+    @for (p of participants; track p.identity) {
+      <div class="video-tile">
+        <div class="tile-avatar">
+          <span>{{ p.identity.charAt(0).toUpperCase() }}</span>
+        </div>
+        <video [id]="'rv-' + p.identity" autoplay playsinline></video>
+        <audio [id]="'ra-' + p.identity" autoplay></audio>
+        <span class="tile-label">{{ p.identity }}</span>
+      </div>
+    }
+  </div>
+
+  <div class="bar-spacer"></div>
+
+  @if (chatConnected) {
+    <div class="bar-meta">
+      <div class="bar-room-label">接続中</div>
+      <div class="bar-room-name">{{ cfg.roomName }}</div>
+    </div>
+
+    <div class="bar-controls">
+      <button class="ctrl-btn" [class.ctrl-off]="micMuted"
+              title="マイク切替" (click)="toggleMic()">
+        {{ micMuted ? '🔇' : '🎤' }}
+      </button>
+      <button class="ctrl-btn" [class.ctrl-off]="camOff"
+              title="カメラ切替" (click)="toggleCam()">
+        {{ camOff ? '📷' : '📸' }}
+      </button>
+      <button class="leave-btn" (click)="manualDisconnect()">退出</button>
+    </div>
+  }
+</div>
+
+<!-- ============================================================
+     Canvas
+============================================================ -->
+@if (started) {
+  <canvas #worldCanvas id="worldCanvas"></canvas>
+}
+
+<!-- ============================================================
+     HUD
+============================================================ -->
+@if (started) {
+  <div class="hud">
+    @if (nearbyName && !chatConnected && !connecting) {
+      <div class="toast toast-nearby">
+        👥 <strong>{{ nearbyName }}</strong> が近くにいます…
+      </div>
+    }
+    @if (connecting) {
+      <div class="toast toast-connecting">⏳ ビデオチャット接続中…</div>
+    }
+    <div class="hud-hint">
+      WASD / 矢印キー で移動 · <span class="hud-players">👤 {{ playerCount }} 人</span>
+    </div>
+  </div>
+}
+
+<!-- エラーバナー -->
+@if (errorMsg) {
+  <div class="error-banner">⚠️ {{ errorMsg }}</div>
+}

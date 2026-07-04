@@ -1,0 +1,12 @@
+{
+  "name": "chat-worker-d1",
+  "main": "src/index.ts",
+  "compatibility_date": "2024-07-25",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": { "directory": "../web/out", "binding": "ASSETS" },
+  "d1_databases": [{ "binding": "DB", "database_name": "chat-d1-db", "database_id": "0d40e4af-16e6-4fbd-9581-cb3f788a52c0", "migrations_dir": "src/db/migrations" }],
+  "durable_objects": { "bindings": [{ "name": "CHAT_ROOM", "class_name": "ChatRoom" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["ChatRoom"] }],
+  "vars": { "RP_ID": "localhost", "RP_NAME": "Chat App D1", "RP_ORIGIN": "http://localhost:8787", "ENVIRONMENT": "development" },
+  "env": { "production": { "vars": { "RP_ID": "yourdomain.com", "RP_NAME": "ChatApp", "RP_ORIGIN": "https://yourdomain.com", "ENVIRONMENT": "production" } } }
+}

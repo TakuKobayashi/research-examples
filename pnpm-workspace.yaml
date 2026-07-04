@@ -1,9 +1,2 @@
-packages:
-  - 'web'
-  - 'server'
 allowBuilds:
-  canvas: false
   esbuild: false
-  sharp: false
-  unrs-resolver: false
-  workerd: false

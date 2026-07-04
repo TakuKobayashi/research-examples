@@ -1,0 +1,11 @@
+name: serverless-plantscale-mysql
+slug: serverless-plantscale-mysql
+description_ja: Serverless Framework と Fastify を使い、PlanetScale MySQL との接続やサーバーレス API 構成を検証するサンプルプロジェクト。
+status: incubating
+repo: null
+tags:
+  - Serverless Framework
+  - PlanetScale
+  - MySQL
+  - Fastify
+description: A sample project that uses Serverless Framework and Fastify to verify the connection to PlanetScale MySQL and serverless API configuration。

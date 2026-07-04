@@ -1,16 +1,26 @@
 {
-  "name": "ai-vtuber-metamorphosis-server-root",
-  "version": "1.0.0",
+  "name": "research-examples",
   "private": true,
-  "workspaces": [
-    "web",
-    "server"
-  ],
   "scripts": {
-    "dev:web": "pnpm --filter web dev",
-    "dev:server": "pnpm --filter server dev",
-    "build:web": "pnpm --filter web build",
-    "deploy:cloudflare": "pnpm build:web && pnpm --filter server deploy:cloudflare",
-    "lint": "pnpm --filter web lint"
+    "projects:add": "tsx scripts/cli.ts add",
+    "projects:translate": "tsx scripts/cli.ts translate",
+    "projects:sync": "tsx scripts/cli.ts sync",
+    "projects:readme": "tsx scripts/cli.ts readme",
+    "projects:validate": "tsx scripts/cli.ts validate",
+    "projects:pull": "tsx scripts/cli.ts pull",
+    "projects:push": "tsx scripts/cli.ts push",
+    "projects:status": "tsx scripts/cli.ts status",
+    "translate:start": "docker compose up -d",
+    "translate:stop": "docker compose down",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "commander": "^12.0.0",
+    "fast-glob": "^3.3.2",
+    "js-yaml": "^4.1.0",
+    "prettier": "^3.2.5",
+    "tsx": "^4.7.1",
+    "typescript": "^5.4.2"
   }
 }

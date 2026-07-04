@@ -1,0 +1,11 @@
+name: github-api-file-upload
+slug: github-api-file-upload
+description_ja: GitHub API と Octokit を使い、リポジトリ内ファイルの作成・更新・アップロード処理を検証するサンプルプロジェクト。
+status: incubating
+repo: null
+tags:
+  - GitHub API
+  - Octokit
+  - TypeScript
+  - file-upload
+description: A sample project that uses GitHub API and Octokit to verify the creation, update, and uploading of files in the repository。

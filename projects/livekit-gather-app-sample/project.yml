@@ -1,0 +1,11 @@
+description_ja: Gather風バーチャルワークスペースサービス。PartyKitとLiveKitを用いたWebSocket / WebRTC構成やオンライン空間設計を検証。
+name: livekit-gather-app-sample
+slug: livekit-gather-app-sample
+status: incubating
+repo: null
+tags:
+  - PartyKit
+  - LiveKit
+  - WebRTC
+  - virtual workspace
+description: A sample project that explores WebSocket/WebRTC architecture and interactive online spaces using PartyKit and LiveKit, inspired by Gather.

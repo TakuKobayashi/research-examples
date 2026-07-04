@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <EditText
+        android:id="@+id/advertisingNicknameText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@+id/advertisingStartButton"
+        android:layout_alignParentTop="true"
+        android:hint="@string/advertising_nickname_text_hint"
+        />
+
+    <Button
+        android:id="@+id/advertisingStartButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:text="@string/advertising_start_button_text"
+        />
+
+    <Button
+        android:id="@+id/discoveryStartButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/advertisingStartButton"
+        android:text="@string/discovery_start_button_text"
+        />
+
+    <TextView
+        android:id="@+id/discoveryFoundLabelTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/discoveryStartButton"
+        android:text="@string/discovery_found_label_text"
+        />
+
+    <ListView
+        android:id="@+id/discoveryFoundListView"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_below="@+id/discoveryFoundLabelTextView" />
+
+    <RelativeLayout
+        android:id="@+id/afterConnectionLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/discoveryFoundListView">
+
+        <RelativeLayout
+            android:id="@+id/sendDataFieldLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/sendDataText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toLeftOf="@+id/selectFileButton"
+                android:layout_centerVertical="true"
+            />
+
+            <Button
+                android:id="@+id/selectFileButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:text="ファイルを添付する"
+                />
+        </RelativeLayout>
+
+        <ListView
+            android:id="@+id/connectedListView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/sendDataFieldLayout" />
+    </RelativeLayout>
+
+</RelativeLayout>

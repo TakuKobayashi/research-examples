@@ -1,0 +1,11 @@
+name: mmd-parser-sample
+slug: mmd-parser-sample
+description_ja: mmd-parser を使い、MMD の PMX モデルファイルや VMD モーションファイルを Node.js/Serverless 環境で読み込む検証プロジェクト。
+status: incubating
+repo: null
+tags:
+  - MMD
+  - mmd-parser
+  - Serverless Framework
+  - TypeScript
+description: a validation project that uses mmd-parser to load MMD's PMX model files and VMD motion files in Node.js/Serverless environments。

@@ -1,0 +1,11 @@
+name: turnless-webrtc-sample
+slug: turnless-webrtc-sample
+description_ja: TURN サーバーを使わず STUN のみで WebRTC のビデオチャットとデータチャネル通信を試す Next.js サンプルプロジェクト。
+status: incubating
+repo: null
+tags:
+  - Next.js
+  - WebRTC
+  - RTCDataChannel
+  - TypeScript
+description: A sample project that tries WebRTC video chat and data channel communication using only STUN without TURN server in Next.js.

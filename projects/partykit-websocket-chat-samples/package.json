@@ -1,0 +1,28 @@
+{
+  "name": "chat-app",
+  "private": true,
+  "packageManager": "pnpm@9.0.0",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev:web": "pnpm run --filter web dev",
+    "dev:angular": "pnpm run --filter web-angular dev",
+    "dev:d1": "pnpm run --filter worker-d1 dev",
+    "dev:kv": "pnpm run --filter worker-kv dev",
+    "format:apps": "prettier --write --ignore-path .prettierignore \"apps/**/*.{js,jsx,ts,tsx,mjs,cjs,json,jsonc,css,html,md,mdx,yml,yaml}\" \"apps/**/.prettierrc*\"",
+    "format:apps:check": "prettier --check --ignore-path .prettierignore \"apps/**/*.{js,jsx,ts,tsx,mjs,cjs,json,jsonc,css,html,md,mdx,yml,yaml}\" \"apps/**/.prettierrc*\"",
+    "build:web": "pnpm run --filter web build",
+    "build:angular": "pnpm run --filter web-angular build",
+    "build:d1": "pnpm run --filter worker-d1 build",
+    "build:kv": "pnpm run --filter worker-kv build",
+    "deploy:d1": "pnpm run build:web && cd apps/worker-d1 && pnpm run wrangler deploy",
+    "deploy:kv": "pnpm run build:web && cd apps/worker-kv && pnpm run wrangler deploy",
+    "deploy:angular-d1": "pnpm run build:angular && cd apps/web-angular && pnpm run wrangler deploy",
+    "migrate:d1:remote": "cd apps/worker-d1 && pnpm run wrangler d1 migrations apply chat-d1-db --remote",
+    "migrate:d1:local": "cd apps/worker-d1 && pnpm run wrangler d1 migrations apply chat-d1-db --local",
+    "typecheck": "pnpm run -r typecheck"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  }
+}

@@ -1,0 +1,11 @@
+name: NearbyConnectionSample
+slug: NearbyConnectionSample
+description_ja: Android の Nearby Connections API を使い、近距離端末間の広告、検出、接続、ペイロード送受信を検証するサンプルプロジェクト。
+status: incubating
+repo: null
+tags:
+  - Android
+  - Kotlin
+  - Nearby Connections
+  - P2P
+description: A sample project that uses the Nearby Connections API of Android to verify advertisement, detection, connection, and payload transmission between terminals.

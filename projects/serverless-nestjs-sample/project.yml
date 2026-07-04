@@ -1,0 +1,11 @@
+name: serverless-nestjs-sample
+slug: serverless-nestjs-sample
+description_ja: NestJS アプリケーションを Serverless Framework と serverless-express で AWS Lambda に載せる構成を検証するサンプルプロジェクト。
+status: incubating
+repo: null
+tags:
+  - NestJS
+  - Serverless Framework
+  - AWS Lambda
+  - TypeScript
+description: A sample project that verifies the configuration of a NestJS application on AWS Lambda using Serverless Framework and serverless-express.

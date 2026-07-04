@@ -1,0 +1,16 @@
+{
+  "name": "gather-app",
+  "private": true,
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "dev": "turbo run dev --filter=!//",
+    "build": "turbo run build --filter=!//",
+    "lint": "turbo run lint --filter=!//",
+    "livekit:up": "docker-compose up -d",
+    "livekit:down": "docker-compose down",
+    "livekit:logs": "docker-compose logs -f livekit"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.3"
+  }
+}

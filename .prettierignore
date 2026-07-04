@@ -1,0 +1,69 @@
+# =========================
+# Dependencies
+# =========================
+node_modules
+
+# =========================
+# Lock files
+# =========================
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# =========================
+# Build outputs
+# =========================
+dist
+out
+build
+coverage
+
+templates/README.ja.template.md
+templates/README.template.md
+# =========================
+# GENERATED OUTPUT (this repo)
+# =========================
+
+portfolio/
+
+# =========================
+# SUBMODULES (CRITICAL)
+# projects are external repositories
+# =========================
+projects/**
+
+# =========================
+# Git internals (safety)
+# =========================
+.git
+.gitmodules
+.git/modules
+
+# =========================
+# Logs
+# =========================
+*.log
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# IDE
+# =========================
+.vscode
+.idea
+
+# =========================
+# Temp/cache
+# =========================
+tmp
+temp
+.cache
+
+# =========================
+# Docker runtime (optional local infra)
+# =========================
+docker/libretranslate

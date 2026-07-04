@@ -1,0 +1,45 @@
+/* apps/gather-frontend/src/styles.scss */
+/* グローバルスタイル — CSS カスタムプロパティはコンポーネント SCSS から参照できる */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:         #0f0f1a;
+  --surface:    #13132a;
+  --surface2:   #1a1a36;
+  --border:     rgba(255, 255, 255, 0.08);
+  --border-mid: rgba(255, 255, 255, 0.14);
+  --accent:     #4e54c8;
+  --accent-h:   #626ad4;
+  --success:    #2ecc71;
+  --danger:     #c0392b;
+  --danger-h:   #e74c3c;
+  --text:       #fff;
+  --text-muted: rgba(255, 255, 255, 0.38);
+  --text-dim:   rgba(255, 255, 255, 0.2);
+  --radius-sm:  6px;
+  --radius-md:  10px;
+  --radius-lg:  16px;
+  --shadow-lg:  0 24px 80px rgba(0, 0, 0, 0.6);
+  --transition: 0.2s ease;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

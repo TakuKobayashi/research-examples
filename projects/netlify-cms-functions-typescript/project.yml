@@ -1,0 +1,11 @@
+name: netlify-cms-functions-typescript
+slug: netlify-cms-functions-typescript
+description_ja: TypeScript 対応の Gatsby Material Starter をベースに、Netlify CMS や Gatsby テーマ構成を検証するサンプルプロジェクト。
+status: incubating
+repo: null
+tags:
+  - Netlify CMS
+  - Gatsby
+  - TypeScript
+  - Material UI
+description: A sample project that verifies Netlify CMS and Gatsby theme configuration based on a TypeScript-enabled Gatsby Material Starter.

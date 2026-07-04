@@ -1,0 +1,19 @@
+{
+  "name": "ela-api",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "format": "prettier --write \"packages/**/*.{ts,tsx,js,json,md}\"",
+    "format:check": "prettier --check \"packages/**/*.{ts,tsx,js,json,md}\"",
+    "build:docs": "npm run build:docs -w packages/frontend",
+    "dev:worker": "npm run dev -w packages/worker",
+    "dev:frontend": "npm run dev -w packages/frontend",
+    "deploy:worker": "npm run deploy -w packages/worker",
+    "deploy:frontend": "npm run deploy -w packages/frontend",
+    "deploy:all": "bash scripts/build-and-copy.sh && npm run deploy:worker"
+  },
+  "devDependencies": {
+    "prettier": "^3.5.3"
+  }
+}

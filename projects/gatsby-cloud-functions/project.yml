@@ -1,0 +1,11 @@
+name: gatsby-cloud-functions
+slug: gatsby-cloud-functions
+description_ja: Gatsby Cloud Functions の使い方を調査するため、Gatsby ブログスターターをベースに機能検証を行うサンプルプロジェクト。
+status: incubating
+repo: null
+tags:
+  - Gatsby
+  - Gatsby Cloud
+  - React
+  - TypeScript
+description: A sample project that verifies the usage of Gatsby Cloud Functions based on a Gatsby blog starter.

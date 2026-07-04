@@ -1,0 +1,13 @@
+name: research-examples
+slug: research-examples
+description_ja: SaaS、ツール、ライブラリ、クラウド機能などの使い方を調査するためのサンプルプロジェクト集。各技術の検証用コードや管理スクリプトをまとめている。
+description: A collection of sample projects for investigating the usage of SaaS, tools, libraries, and cloud features. It includes verification code and management scripts for each technology.
+translation_locked: false
+status: incubating
+repo:
+tags:
+  - research
+  - samples
+  - tooling
+  - automation
+  - templates

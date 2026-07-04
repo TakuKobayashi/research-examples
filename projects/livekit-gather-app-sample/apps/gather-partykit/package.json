@@ -1,0 +1,19 @@
+{
+  "name": "@gather/gather-partykit",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "partykit dev",
+    "build": "tsc --noEmit",
+    "deploy": "partykit deploy",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "partysocket": "^1.0.3",
+    "@gather/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "partykit": "^0.0.112",
+    "typescript": "^5.7.2"
+  }
+}

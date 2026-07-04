@@ -1,0 +1,11 @@
+name: python-aws-lambda
+slug: python-aws-lambda
+description_ja: Python で AWS Lambda 向けのアプリケーションを構築し、Chalice や依存関係管理を含む開発環境を検証するサンプルプロジェクト。
+status: incubating
+repo: null
+tags:
+  - Python
+  - AWS Lambda
+  - Chalice
+  - uv
+description: A sample project that builds applications for AWS Lambda in Python and verifies development environments including Chalice and dependency management.

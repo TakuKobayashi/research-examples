@@ -1,0 +1,11 @@
+name: webpush-sample-with-demo
+slug: webpush-sample-with-demo
+description_ja: Cloudflare Workers Assets と Next.js を使い、Web Push API と Firebase Cloud Messaging によるブラウザ通知配信を検証するデモプロジェクト。
+status: incubating
+repo: null
+tags:
+  - Web Push
+  - Cloudflare Workers
+  - Next.js
+  - Firebase
+description: A demo project that verifies browser notification delivery using Web Push API and Firebase Cloud Messaging with Cloudflare Workers Assets and Next.js.

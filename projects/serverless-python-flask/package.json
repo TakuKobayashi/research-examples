@@ -1,0 +1,17 @@
+{
+  "name": "serverless-python-flask",
+  "scripts": {
+    "serverless": "serverless"
+  },
+  "description": "Serverless webpack example using python",
+  "author": "TakuKobayashi",
+  "private": true,
+  "license": "MIT",
+  "dependencies": {
+    "serverless": "^3.19.0",
+    "serverless-dotenv-plugin": "^4.0.1",
+    "serverless-offline": "^8.8.0",
+    "serverless-python-requirements": "^5.0.1",
+    "serverless-wsgi": "^3.0.0"
+  }
+}

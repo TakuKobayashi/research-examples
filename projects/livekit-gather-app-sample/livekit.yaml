@@ -1,0 +1,31 @@
+# livekit.yaml
+# ローカル開発用 LiveKit Server 設定
+#
+# 本番(Oracle Cloud)では同じキーを livekit.yaml に設定し、
+# フロントの SERVER_URL だけ変更すれば切り替え完了。
+
+port: 7880
+rtc:
+  tcp_port: 7881
+  udp_port: 7882
+  use_external_ip: false          # ローカルでは false
+  # 本番では true にして Oracle の Public IP を指定
+  # node_ip: "your.oracle.public.ip"
+
+redis:
+  address: redis:6379
+
+keys:
+  # API Key: devkey  /  Secret: secret-at-least-32-chars-long!!
+  # apps/api/.dev.vars と合わせること
+  devkey: secret-at-least-32-chars-long!!
+
+log_level: info
+
+# TURN サーバー(ローカルでは不要だが設定例として残す)
+# turn:
+#   enabled: true
+#   domain: your.domain.com
+#   cert_file: /etc/livekit/tls.crt
+#   key_file: /etc/livekit/tls.key
+#   tls_port: 3478

@@ -1,0 +1,11 @@
+name: python-opencv
+slug: python-opencv
+description_ja: Python と OpenCV を使った画像処理やローカル実行環境を検証するためのサンプルプロジェクト。
+status: incubating
+repo: null
+tags:
+  - Python
+  - OpenCV
+  - image-processing
+  - uv
+description: A sample project to verify image processing and local execution environment using Python and OpenCV.

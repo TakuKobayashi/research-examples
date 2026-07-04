@@ -1,0 +1,10 @@
+name: GodotSample
+slug: GodotSample
+description_ja: Godot 4 の基本プロジェクト構成や 3D シーン作成を試すための小規模な検証サンプル。
+status: incubating
+repo: null
+tags:
+  - Godot
+  - game-development
+  - 3D
+description: Small-scale validation samples for Godot 4 basic project configuration and 3D scene creation。

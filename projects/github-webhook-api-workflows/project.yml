@@ -1,0 +1,11 @@
+name: github-webhook-api-workflows
+slug: github-webhook-api-workflows
+description_ja: GitHub API で Actions のワークフロー一覧、実行履歴、dispatch 実行などを扱う API を検証する Serverless サンプルプロジェクト。
+status: incubating
+repo: null
+tags:
+  - GitHub API
+  - GitHub Actions
+  - Serverless Framework
+  - TypeScript
+description: Serverless sample project to verify APIs that handle Actions workflow list, execution history, and dispatch execution in GitHub API。

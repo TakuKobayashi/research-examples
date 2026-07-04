@@ -1,0 +1,11 @@
+description_ja: PartyKitを活用し、リアルタイム通信・WebSocket構成・無料運用可能性を学ぶためのマルチプラットフォーム対応チャットアプリサンプル。
+name: partykit-websocket-chat-samples
+slug: partykit-websocket-chat-samples
+status: incubating
+repo: null
+tags:
+  - PartyKit
+  - WebSocket
+  - sample
+  - real-time
+description: A sample project that builds a chat application using PartyKit to learn about real-time communication, WebSocket architecture, and free hosting possibilities across multiple platforms.

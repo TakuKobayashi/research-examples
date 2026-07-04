@@ -1,0 +1,11 @@
+name: MLKitSample
+slug: MLKitSample
+description_ja: Android の CameraX と Google ML Kit を使い、顔検出やバーコード読み取りをカメラ映像から行う検証サンプル。
+status: incubating
+repo: null
+tags:
+  - Android
+  - Kotlin
+  - ML Kit
+  - CameraX
+description: Verification sample using CameraX and Google ML Kit on Android.
