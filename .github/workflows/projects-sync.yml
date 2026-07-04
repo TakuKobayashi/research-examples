@@ -11,7 +11,7 @@ on:
       - 'package.json'
       - 'pnpm-lock.yaml'
       - '.gitmodules'
-      - '.github/workflows/projects-sync.yml'
+      - '.github/workflows/**'
   workflow_dispatch:
 
 permissions:
