@@ -1,9 +1,0 @@
-{
-  "$schema": "https://www.partykit.io/schema.json",
-  "name": "signaling-party",
-  "main": "party/room.ts",
-  "parties": {
-    "lobby": "party/lobby.ts"
-  },
-  "compatibilityDate": "2024-09-23"
-}

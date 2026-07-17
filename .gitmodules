@@ -7,3 +7,6 @@
 [submodule "projects/voicevox-webplayer-sample"]
 	path = projects/voicevox-webplayer-sample
 	url = git@github.com:TakuKobayashi/voicevox-webplayer-sample.git
+[submodule "projects/realtime-p2p-demo"]
+	path = projects/realtime-p2p-demo
+	url = git@github.com:TakuKobayashi/realtime-p2p-demo.git
