@@ -1,0 +1,13 @@
+{
+    "name": "PhantomCatWorks.RealtimeP2PKit.Demo",
+    "rootNamespace": "PhantomCatWorks.RealtimeP2PKit.Demo",
+    "references": [
+        "PhantomCatWorks.RealtimeP2PKit",
+        "Unity.WebRTC"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
+}

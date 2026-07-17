@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "com.phantomcatworks.realtimep2p": "file:com.phantomcatworks.realtimep2p",
+    "com.unity.webrtc": "3.0.0-pre.8",
+    "com.unity.nuget.newtonsoft-json": "3.2.1",
+    "com.endel.nativewebsocket": "https://github.com/endel/NativeWebSocket.git#upm",
+    "com.github-glitchenzo.nugetforunity": "https://github.com/GlitchEnzo/NuGetForUnity.git?path=/src/NuGetForUnity#v4.1.1",
+    "com.unity.modules.animation": "1.0.0",
+    "com.unity.modules.physics": "1.0.0",
+    "com.unity.modules.unitywebrequest": "1.0.0",
+    "com.unity.render-pipelines.universal": "14.0.11"
+  }
+}

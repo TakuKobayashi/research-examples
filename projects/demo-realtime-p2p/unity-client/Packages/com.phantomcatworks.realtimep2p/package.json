@@ -1,0 +1,15 @@
+{
+  "name": "com.phantomcatworks.realtimep2p",
+  "version": "0.1.0",
+  "displayName": "Realtime P2P Kit",
+  "description": "Reusable WebRTC matchmaking + PartyKit signaling + MessagePack data-channel transport for real-time 1v1 multiplayer games. Entry point is the P2PManager singleton. Designed to be extracted into its own git repository and imported into other Unity projects via UPM (git URL or local path).",
+  "unity": "2022.3",
+  "dependencies": {
+    "com.unity.webrtc": "3.0.0-pre.8",
+    "com.unity.nuget.newtonsoft-json": "3.2.1"
+  },
+  "keywords": ["webrtc", "p2p", "multiplayer", "networking", "messagepack", "partykit", "realtime"],
+  "author": {
+    "name": "phantomcatworks"
+  }
+}

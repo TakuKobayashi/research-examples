@@ -1,0 +1,14 @@
+{
+  "name": "realtime-p2p-server",
+  "private": true,
+  "packageManager": "pnpm@9.12.0",
+  "scripts": {
+    "dev:api": "pnpm --filter matching-api dev",
+    "dev:party": "pnpm --filter signaling-party dev",
+    "deploy:api": "pnpm --filter matching-api deploy",
+    "deploy:party": "pnpm --filter signaling-party deploy",
+    "db:generate": "pnpm --filter matching-api db:generate",
+    "db:migrate:local": "pnpm --filter matching-api db:migrate:local",
+    "db:migrate:remote": "pnpm --filter matching-api db:migrate:remote"
+  }
+}

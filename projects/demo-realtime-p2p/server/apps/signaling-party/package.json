@@ -1,0 +1,14 @@
+{
+  "name": "signaling-party",
+  "private": true,
+  "scripts": {
+    "dev": "partykit dev",
+    "deploy": "partykit deploy"
+  },
+  "dependencies": {
+    "partykit": "^0.0.114"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}

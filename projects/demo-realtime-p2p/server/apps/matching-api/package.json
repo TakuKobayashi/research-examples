@@ -1,0 +1,22 @@
+{
+  "name": "matching-api",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate:local": "wrangler d1 migrations apply realtime-p2p-db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply realtime-p2p-db --remote"
+  },
+  "dependencies": {
+    "hono": "^4.6.0",
+    "drizzle-orm": "^0.36.0"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.28.0",
+    "wrangler": "^3.90.0",
+    "typescript": "^5.6.0",
+    "@cloudflare/workers-types": "^4.20240925.0",
+    "@types/node": "^22.7.0"
+  }
+}
