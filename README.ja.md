@@ -35,7 +35,6 @@
 | [AndroidWebRTCSample](./projects/AndroidWebRTCSample/)                             | Android アプリで WebRTC のカメラ映像取得、SurfaceViewRenderer 表示、カメラ切り替えなどを検証するサンプルプロジェクト。                   | incubating |
 | [aws-lambda-cdk-hono-images](./projects/aws-lambda-cdk-hono-images/)               | AWS CDK と Hono を使い、Lambda 上で画像取得や HTTP API の構成を検証する TypeScript サンプルプロジェクト。                                | incubating |
 | [cloudflare-hono-sample](./projects/cloudflare-hono-sample/)                       | Cloudflare Workers 上で Hono、KV、D1、Prisma を組み合わせた API 実装を検証するサンプルプロジェクト。                                     | incubating |
-| [demo-realtime-p2p](./projects/demo-realtime-p2p/)                                 |                                                                                                                                          | incubating |
 | [gatsby-cloud-functions](./projects/gatsby-cloud-functions/)                       | Gatsby Cloud Functions の使い方を調査するため、Gatsby ブログスターターをベースに機能検証を行うサンプルプロジェクト。                     | incubating |
 | [github-api-file-upload](./projects/github-api-file-upload/)                       | GitHub API と Octokit を使い、リポジトリ内ファイルの作成・更新・アップロード処理を検証するサンプルプロジェクト。                         | incubating |
 | [github-webhook-api-workflows](./projects/github-webhook-api-workflows/)           | GitHub API で Actions のワークフロー一覧、実行履歴、dispatch 実行などを扱う API を検証する Serverless サンプルプロジェクト。             | incubating |
@@ -58,6 +57,7 @@
 | [PushNotification](./projects/PushNotification/)                                   | Android のプッシュ通知やネイティブ連携の検証を目的とした、Kotlin と C++ ネイティブコードを含む Android サンプルプロジェクト。            | incubating |
 | [python-aws-lambda](./projects/python-aws-lambda/)                                 | Python で AWS Lambda 向けのアプリケーションを構築し、Chalice や依存関係管理を含む開発環境を検証するサンプルプロジェクト。                | incubating |
 | [python-opencv](./projects/python-opencv/)                                         | Python と OpenCV を使った画像処理やローカル実行環境を検証するためのサンプルプロジェクト。                                                | incubating |
+| [realtime-p2p-demo](./projects/realtime-p2p-demo/)                                 |                                                                                                                                          | incubating |
 | [serverless-ffmpeg](./projects/serverless-ffmpeg/)                                 | Serverless Framework と Express を使い、AWS Lambda 上で ffmpeg を利用する構成を検証する TypeScript サンプルプロジェクト。                | incubating |
 | [serverless-github-upload-reources](./projects/serverless-github-upload-reources/) | Serverless Framework、Fastify、Octokit を使い、GitHub リポジトリへのリソースアップロード API を検証するサンプルプロジェクト。            | incubating |
 | [serverless-google-photos](./projects/serverless-google-photos/)                   | Google Photos API と googleapis を Serverless Framework 上で扱い、写真データ連携を検証する TypeScript サンプルプロジェクト。             | incubating |
